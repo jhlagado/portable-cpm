@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-transient-smoke",
-  "description": "Require the Triptych CCP to match blank-line, drive-selection, missing-command, transient-load, persistence, and warm-return behavior",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-transient-smoke",
+  "description": "Require the portable CCP to match blank-line, drive-selection, missing-command, transient-load, persistence, and warm-return behavior",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "expectedInitialDriveSha256": "a153918c0a6804e3448e76e8d83360bdecab4ccfe445416038b63a68385c11cc",
   "expectedFinalFiles": [
     {

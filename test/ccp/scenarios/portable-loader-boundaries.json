@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-loader-exact-limit",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-loader-exact-limit",
   "description": "Prove that an exact-TPA program loads and returns without damaging a subsequent transient",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "maximumSlices": 1200,
   "initialFiles": [
     {

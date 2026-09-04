@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
+  "schema": "portable-cpm-headless-scenario-v1",
   "id": "ccp-oracle-mutation-builtins",
   "description": "Freeze successful REN, ERA, and SAVE behavior at the public console and disk boundaries",
   "systemCcp": "oracle",

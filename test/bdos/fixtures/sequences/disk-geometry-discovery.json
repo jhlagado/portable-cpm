@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "disk-geometry-discovery",
   "description": "Discover a deliberately non-IBM disk geometry and reconstruct its allocation vector through public DPH/DPB data",
   "biosDisk": {

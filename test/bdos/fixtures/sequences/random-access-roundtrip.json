@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "random-access-roundtrip",
   "description": "Read, size, address, and extend a file through the CP/M random-record functions",
   "biosDisk": {

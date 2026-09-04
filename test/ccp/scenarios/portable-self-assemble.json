@@ -1,14 +1,14 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-self-assemble",
-  "description": "Assemble the Triptych CCP source inside CP/M with ATOM.COM and verify the exact resident image",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-self-assemble",
+  "description": "Assemble the portable CCP source inside CP/M with ATOM.COM and verify the exact resident image",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "maximumSlices": 4000,
   "initialFiles": [
     {
       "name": "CCP.ASM",
-      "path": "roms/cpu/ccp/ccp.asm",
+      "path": "src/ccp.asm",
       "encoding": "cpm-text"
     }
   ],

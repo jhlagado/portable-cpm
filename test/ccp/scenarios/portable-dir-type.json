@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-dir-type",
-  "description": "Run DIR and TYPE through the Triptych CCP and BDOS with exact oracle-compatible transcripts",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-dir-type",
+  "description": "Run DIR and TYPE through the portable CCP and BDOS with exact oracle-compatible transcripts",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "expectedInitialDriveSha256": "a153918c0a6804e3448e76e8d83360bdecab4ccfe445416038b63a68385c11cc",
   "sessions": [
     {

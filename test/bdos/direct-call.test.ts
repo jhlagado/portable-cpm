@@ -97,7 +97,7 @@ function sequentialExtentWriteFixture(): BdosDirectCallSequenceFixture {
     expected: {},
   });
   return {
-    schema: "triptych-bdos-direct-sequence-v1",
+    schema: "portable-cpm-bdos-direct-sequence-v1",
     id: "sequential-write-extent-rollover",
     description:
       "Write and close 129 records across two CP/M extents, then rename every extent",
@@ -323,7 +323,7 @@ describe("CP/M 2.2 BDOS direct-call contract", () => {
         expectedBdosSha256,
       );
       const fixture = readFixture(fixtureName);
-      expect(fixture.schema).toBe("triptych-bdos-direct-call-v1");
+      expect(fixture.schema).toBe("portable-cpm-bdos-direct-call-v1");
       expect(fixture.evidence.length).toBeGreaterThan(0);
 
       const result = runBdosDirectCall(referenceBdos, fixture);
@@ -344,7 +344,7 @@ describe("CP/M 2.2 BDOS direct-call contract", () => {
     "runs the %s stateful fixture against the frozen black-box oracle",
     (fixtureName) => {
       const fixture = readSequenceFixture(fixtureName);
-      expect(fixture.schema).toBe("triptych-bdos-direct-sequence-v1");
+      expect(fixture.schema).toBe("portable-cpm-bdos-direct-sequence-v1");
       const result = runBdosDirectCallSequence(referenceBdos, fixture);
       expect(result.steps).toHaveLength(fixture.steps.length);
       fixture.steps.forEach((step, index) => {

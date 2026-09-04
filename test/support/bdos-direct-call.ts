@@ -39,7 +39,7 @@ const BIOS_NAMES = [
 ] as const;
 
 export interface BdosDirectCallFixture {
-  schema: "triptych-bdos-direct-call-v1";
+  schema: "portable-cpm-bdos-direct-call-v1";
   id: string;
   evidence: Array<{
     kind: "published-interface" | "black-box-compatibility";
@@ -170,7 +170,7 @@ export interface BdosDirectCallResult {
 export type BdosDirectCallStep = Omit<BdosDirectCallFixture, "schema">;
 
 export interface BdosDirectCallSequenceFixture {
-  schema: "triptych-bdos-direct-sequence-v1";
+  schema: "portable-cpm-bdos-direct-sequence-v1";
   id: string;
   description: string;
   biosDisk?: BdosBiosDiskFixture;
@@ -448,7 +448,7 @@ export function runBdosDirectCallSequence(
     id: fixture.id,
     steps: fixture.steps.map((step) => ({
       id: step.id,
-      result: run({ schema: "triptych-bdos-direct-call-v1", ...step }),
+      result: run({ schema: "portable-cpm-bdos-direct-call-v1", ...step }),
     })),
   };
 }

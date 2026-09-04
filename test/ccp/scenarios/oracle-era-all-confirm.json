@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
+  "schema": "portable-cpm-headless-scenario-v1",
   "id": "ccp-oracle-era-all-confirm",
   "description": "Freeze confirmed ERA *.* deletion through the public console and directory boundaries",
   "systemCcp": "oracle",

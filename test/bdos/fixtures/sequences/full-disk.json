@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "full-disk",
   "description": "Create a directory entry on a disk with no free data blocks, then return status 2 from sequential write without further mutation",
   "biosDisk": {

@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
+  "schema": "portable-cpm-headless-scenario-v1",
   "id": "ccp-oracle-transient-smoke",
   "description": "Freeze blank-line, drive-selection, missing-command, transient-load, persistence, and warm-return behavior",
   "systemCcp": "oracle",

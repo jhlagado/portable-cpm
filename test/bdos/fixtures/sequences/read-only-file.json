@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "read-only-file",
   "description": "Reject deletion of a file whose read-only attribute is set, preserving its directory entry and allocation",
   "biosDisk": {

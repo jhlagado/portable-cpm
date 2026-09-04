@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-call-v1",
+  "schema": "portable-cpm-bdos-direct-call-v1",
   "id": "function-41-out-of-range",
   "evidence": [
     {

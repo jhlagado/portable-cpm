@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "extent-boundary",
   "description": "Read record 127 from a full extent, then attempt to advance to absent extent 1 and return end-of-file",
   "biosDisk": {

@@ -285,7 +285,7 @@ function generatedFilesystemSequence(seed: number): GeneratedSequence {
 
   return {
     fixture: {
-      schema: "triptych-bdos-direct-sequence-v1",
+      schema: "portable-cpm-bdos-direct-sequence-v1",
       id: `randomized-filesystem-${seed.toString(16)}`,
       description:
         "Seeded model-generated CP/M file lifecycle with exact oracle comparison",

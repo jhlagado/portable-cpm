@@ -10,12 +10,12 @@
   },
   "scripts": {
     "build": "node tools/build-release.mjs",
-    "check:azm": "node tools/check-no-azm.mjs",
+    "check:assembler": "node tools/check-atom-only.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "format": "prettier --write \"**/*.{json,md,mjs,ts}\"",
     "format:check": "prettier --check \"**/*.{json,md,mjs,ts}\"",
     "test": "vitest run",
-    "check": "npm run check:azm && npm run typecheck && npm run format:check && npm test && npm run build"
+    "check": "npm run check:assembler && npm run typecheck && npm run format:check && npm test && npm run build"
   },
   "devDependencies": {
     "@jhlagado/debug80-runtime": "^0.2.0",

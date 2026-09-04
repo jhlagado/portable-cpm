@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "absent-drive",
   "description": "Reject selection of a drive whose BIOS SELDSK entry returns zero and transfer through the page-zero warm-boot vector",
   "biosDisk": {

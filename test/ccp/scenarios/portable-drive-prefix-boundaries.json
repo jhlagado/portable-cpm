@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-drive-prefix-boundaries",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-drive-prefix-boundaries",
   "description": "Reject drive prefixes outside the CP/M A-through-P range before access and recover",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "expectedInitialDriveSha256": "a153918c0a6804e3448e76e8d83360bdecab4ccfe445416038b63a68385c11cc",
   "sessions": [
     {

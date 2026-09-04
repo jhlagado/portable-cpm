@@ -30,9 +30,10 @@ npm run check
 ```
 
 `npm run check` assembles the replacement BDOS with the pinned ATOM revision,
-runs the direct-call and randomized filesystem contracts through the external
-Debug80 Z80 runtime, checks formatting and type safety, and rejects accidental
-AZM imports. Debug80 Runtime is a development harness only.
+runs the direct-call, randomized filesystem and CCP scenario contracts through
+the external Debug80 Z80 runtime, checks formatting and type safety, and rejects
+accidental historical-assembler imports. Debug80 Runtime is a development
+harness only.
 
 The retained disk under `third_party/cpm22/` is black-box compatibility
 evidence governed by its accompanying provenance and grant. It is not source

@@ -15,7 +15,7 @@ async function inspect(directory) {
       await inspect(path);
     } else if (
       sourceExtensions.has(extname(entry.name)) &&
-      path !== join(root, "tools", "check-no-azm.mjs")
+      path !== join(root, "tools", "check-atom-only.mjs")
     ) {
       const source = await readFile(path, "utf8");
       if (forbidden.test(source)) findings.push(path.slice(root.length + 1));

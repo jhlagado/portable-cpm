@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "io-byte-roundtrip",
   "description": "Set and then read the I/O byte through public BDOS calls while preserving resident state",
   "steps": [

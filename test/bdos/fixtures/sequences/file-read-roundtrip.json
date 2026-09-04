@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "file-read-roundtrip",
   "description": "Log in a public one-file disk, open and read the file, then search the directory through public BDOS calls",
   "biosDisk": {

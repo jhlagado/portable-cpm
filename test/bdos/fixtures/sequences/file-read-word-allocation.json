@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "file-read-word-allocation",
   "description": "Open and read a file from a DPB that uses two-byte allocation block references",
   "biosDisk": {

@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-extra-operands",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-extra-operands",
   "description": "Reject extra DIR and TYPE operands before performing the command and recover at the next prompt",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "expectedInitialDriveSha256": "a153918c0a6804e3448e76e8d83360bdecab4ccfe445416038b63a68385c11cc",
   "sessions": [
     {

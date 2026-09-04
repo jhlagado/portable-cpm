@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-page-zero",
-  "description": "Require the Triptych CCP vertical slice to match the frozen public page-zero and transient-return behavior",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-page-zero",
+  "description": "Require the portable CCP vertical slice to match the frozen public page-zero and transient-return behavior",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "initialPrograms": [
     {
       "kind": "assemble-atom",

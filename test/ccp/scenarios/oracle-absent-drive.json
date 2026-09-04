@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
+  "schema": "portable-cpm-headless-scenario-v1",
   "id": "ccp-oracle-absent-drive",
   "description": "Freeze the fatal diagnostic produced when selecting an absent drive through the public BDOS error path",
   "systemCcp": "oracle",

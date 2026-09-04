@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
+  "schema": "portable-cpm-headless-scenario-v1",
   "id": "ccp-oracle-era-all-cancel",
   "description": "Freeze the ERA *.* confirmation and cancellation transcript",
   "systemCcp": "oracle",

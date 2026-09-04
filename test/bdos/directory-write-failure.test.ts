@@ -147,7 +147,7 @@ function directoryFailureSequence(operation: DirectoryMutation): {
   push(`retry-${operation}`, fn);
   return {
     fixture: {
-      schema: "triptych-bdos-direct-sequence-v1",
+      schema: "portable-cpm-bdos-direct-sequence-v1",
       id: `directory-write-failure-${operation}`,
       description: `Reject and retry a directory-sector write during ${operation}`,
       biosDisk: JSON.parse(JSON.stringify(disk)),

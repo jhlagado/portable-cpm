@@ -1,9 +1,9 @@
 {
-  "schema": "triptych-cpm-headless-scenario-v1",
-  "id": "triptych-ccp-save-overflow",
+  "schema": "portable-cpm-headless-scenario-v1",
+  "id": "portable-ccp-save-overflow",
   "description": "Reject an overflowing SAVE page count before disk mutation and accept the next valid command",
-  "systemCcp": "triptych",
-  "systemBdos": "triptych",
+  "systemCcp": "portable",
+  "systemBdos": "portable",
   "expectedInitialDriveSha256": "a153918c0a6804e3448e76e8d83360bdecab4ccfe445416038b63a68385c11cc",
   "sessions": [
     {

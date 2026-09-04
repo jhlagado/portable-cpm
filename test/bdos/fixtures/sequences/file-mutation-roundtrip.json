@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "file-mutation-roundtrip",
   "description": "Create, write, close, set attributes, rename, and delete one file on a blank public BIOS disk",
   "biosDisk": {

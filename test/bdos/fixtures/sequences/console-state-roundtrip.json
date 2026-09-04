@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "console-state-roundtrip",
   "description": "Preserve console lookahead across calls and transfer to warm boot after echoing Ctrl-C at the start of a buffered line",
   "steps": [

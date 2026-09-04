@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "wildcard-user-isolation",
   "description": "Search an interleaved directory with wildcard FCBs and prove that each CP/M user sees only its own entries",
   "biosDisk": {

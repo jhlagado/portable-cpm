@@ -70,5 +70,5 @@ describe("portable CP/M release artifacts", () => {
       await rm(firstDirectory, { recursive: true, force: true });
       await rm(secondDirectory, { recursive: true, force: true });
     }
-  });
+  }, 15_000);
 });

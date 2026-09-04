@@ -1,5 +1,5 @@
 {
-  "schema": "triptych-bdos-direct-sequence-v1",
+  "schema": "portable-cpm-bdos-direct-sequence-v1",
   "id": "disk-state-roundtrip",
   "description": "Initialize a standard public DPH/DPB, then exercise CP/M disk, DMA, vector, and user state only through BDOS calls",
   "biosDisk": {
