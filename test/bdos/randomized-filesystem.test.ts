@@ -14,13 +14,7 @@ const referenceDisk = readFileSync(
   resolve(repositoryRoot, "third_party", "cpm22", "cpm22.img"),
 );
 const referenceBdos = referenceDisk.subarray(0x0800, 0x1600);
-const replacementBdosSource = resolve(
-  repositoryRoot,
-  "roms",
-  "cpu",
-  "bdos",
-  "bdos.asm",
-);
+const replacementBdosSource = resolve(repositoryRoot, "src", "bdos.asm");
 const mutationFixture = JSON.parse(
   readFileSync(
     resolve(

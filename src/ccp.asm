@@ -1,7 +1,7 @@
-; Triptych-owned CP/M 2.2 Console Command Processor.
+; Portable CP/M Console Command Processor, CP/M 2.2 interface profile.
 ;
 ; This is an independent implementation against the public CP/M interfaces
-; and Triptych's black-box CCP fixtures. ATOM is its assembler, and it owns no
+; and reviewed black-box CCP fixtures. ATOM is its assembler, and it owns no
 ; state outside $E400..$EBFF while resident.
 
         ORG     $E400
@@ -577,7 +577,7 @@ USERDONE:
         CALL    BDOS
         JP      MAINLOOP
 
-; SAVE writes 256-byte pages from the TPA. The Triptych profile rejects a
+; SAVE writes 256-byte pages from the TPA. The initial placement profile rejects a
 ; count beyond the 227 pages ending at $E3FF instead of reading resident code.
 CMDSAVE:
         LD      HL,(ARGSTRT)

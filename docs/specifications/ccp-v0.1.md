@@ -1,4 +1,4 @@
-# Triptych CP/M 2.2 CCP v0.1 contract
+# Portable CP/M CCP v0.1 contract
 
 Status: draft replacement contract
 
@@ -6,7 +6,7 @@ Date: 2026-09-03
 
 ## Purpose and authority
 
-This document defines the observable boundary of Triptych's Console Command
+This document defines the observable boundary of this Console Command
 Processor. It specifies compatibility, not algorithms. The implementation is
 original Atom-compatible Z80 assembly and is not a translation of a legacy CCP
 source.
@@ -14,10 +14,11 @@ source.
 The authority order is:
 
 1. the documented CP/M 2.2 command and transient-program interfaces;
-2. this Triptych contract for fixed addresses and deterministic choices;
+2. this contract and its named target profile for fixed addresses and
+   deterministic choices;
 3. manual-derived fixtures;
 4. black-box observations from the frozen transitional CCP; and
-5. the Triptych implementation.
+5. this original implementation.
 
 The frozen oracle is the 2,048-byte CCP with SHA-256
 `67fda0f138c3654a2fb15ae49acb2e663c848774779fa9822eda0f6d3a9b8da3`.
@@ -41,7 +42,7 @@ inputs to production code.
 
 The resident image is exactly 2,048 bytes. It owns no page-zero byte except
 while publishing documented transient state. It calls BDOS through `$0005`
-and does not call BIOS, Triptych ports, a host filesystem, or host UI APIs.
+and does not call BIOS, machine ports, a host filesystem, or host UI APIs.
 It is single-tasked and non-reentrant.
 
 Cold and warm boot enter `$E400` with `C` containing the current drive. CCP
@@ -55,7 +56,7 @@ CCP reads one BDOS console-buffer line. The command language is 7-bit ASCII.
 Lowercase letters are converted to uppercase for recognition, file control
 blocks, and the command tail; console echo remains the bytes handled by BDOS.
 Leading and repeated spaces are accepted, and an empty line prints another
-prompt without a diagnostic. The Triptych console profile accepts at most 127
+prompt without a diagnostic. The initial console profile accepts at most 127
 characters before the terminating carriage return.
 
 A drive-only command such as `A:` selects that drive and updates `$0004`.
@@ -92,13 +93,13 @@ For a transient command CCP:
 
 The tail contains the complete remainder after the command word, including
 its leading delimiter. Byte `$0080` is its length, bytes from `$0081` are the
-tail, and the following byte is zero in the frozen Triptych compatibility
+tail, and the following byte is zero in the initial compatibility
 profile. A default FCB uses drive zero for the current drive or one through
 sixteen for an explicit `A:` through `P:` prefix. Unused name and type bytes
 are spaces; transient fields through offset 15 are zero.
 
 The public probe `CCPPROBE b:foo*.bar baz.qux` distinguishes all of those
-choices. Both the oracle and the first Triptych vertical slice publish:
+choices. Both the oracle and this implementation publish:
 
 ```text
 TAIL=13: B:FOO*.BAR BAZ.QUX
@@ -133,7 +134,7 @@ missing files, an existing rename destination, absent drives, read-only files
 and disks, full directories, full disks, load overflow, and failed physical
 I/O. No rejected command may mutate unrelated disk, FCB, page-zero, or
 resident state. After a recoverable error, another command must work. BDOS
-fatal errors may transfer through warm boot and reload CCP. In the Triptych
+fatal errors may transfer through warm boot and reload CCP. In the initial
 profile, a physical sector-I/O failure consumes one acknowledgement and
 performs that warm-boot transfer.
 

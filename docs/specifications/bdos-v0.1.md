@@ -1,4 +1,4 @@
-# Triptych CP/M 2.2 BDOS v0.1 contract
+# Portable CP/M BDOS v0.1 contract
 
 Status: draft replacement contract
 
@@ -6,7 +6,7 @@ Date: 2026-09-02
 
 ## Purpose and authority
 
-This document defines the observable boundary that a Triptych-authored BDOS
+This document defines the observable boundary that this original BDOS
 must implement. It specifies compatibility, not internal algorithms. Source
 structure, labels, instruction selection, private tables, and caching choices
 remain implementation details.
@@ -15,7 +15,8 @@ The authority order is:
 
 1. the documented CP/M 2 system interface in Chapter 5 of the Digital Research
    CP/M Operating System Manual;
-2. this Triptych contract for fixed addresses and deterministic choices;
+2. this contract and its named target profile for fixed addresses and
+   deterministic choices;
 3. contract fixtures derived from the manual;
 4. black-box compatibility observations from the frozen transitional BDOS; and
 5. the new implementation.
@@ -38,7 +39,7 @@ contract.
 | CCP               | `$E400..$EBFF` | Retained compatibility client                                |
 | BDOS              | `$EC00..$F9FF` | Entire code, immutable data, mutable data, and private stack |
 | BDOS public entry |        `$EC06` | Callable through `$0005`                                     |
-| BIOS              | `$FA00..$FDFF` | Triptych-owned hardware-dependent component                  |
+| BIOS              | `$FA00..$FDFF` | Machine-owned hardware-dependent component                   |
 
 The BDOS slot is exactly 3,584 bytes. No implementation-owned byte may be
 hidden in page zero, the TPA, CCP, BIOS, or host. Page-zero locations documented
@@ -116,9 +117,10 @@ fixtures are reviewed.
 
 ## BIOS dependency
 
-The correct BIOS for Triptych is `system/cpm/bios.asm`. It adapts the portable
-CP/M boundary to Triptych's serial and logical-record ports. BDOS must not call
-those ports directly.
+Each target machine owns its BIOS. For the initial consumer, Triptych provides
+`system/cpm/bios.asm` in its own repository and adapts this portable boundary
+to Triptych's serial and logical-record ports. BDOS must not call machine ports
+directly.
 
 BDOS reaches BIOS through the 17 three-byte entries at `$FA00` in this order:
 
@@ -159,15 +161,15 @@ The observable filesystem model includes:
 
 Directory and allocation updates must be published through BIOS sector writes.
 A failed or rejected operation must leave unrelated directory entries,
-allocation bits, FCB fields, and data records unchanged. The Triptych BIOS
-currently flushes each successful CP/M sector write to the host disk boundary;
-BDOS must not assume a host filesystem or a stronger hidden durability path.
+allocation bits, FCB fields, and data records unchanged. A BIOS may flush each
+successful CP/M sector write to a host disk boundary, but BDOS must not assume a
+host filesystem or a stronger hidden durability path.
 Rename and set-file-attributes apply to every directory extent belonging to
 the selected file, not only the extent named by the caller's current FCB
 position.
 
 An absent or internally write-protected drive and any nonzero BIOS sector-I/O
-result are fatal disk errors in the Triptych profile. BDOS prints the reviewed
+result are fatal disk errors in the initial profile. BDOS prints the reviewed
 diagnostic, consumes one acknowledgement byte, and transfers through the BIOS
 warm-boot entry rather than returning to the interrupted call. The machine
 reloads CCP and BDOS before accepting another command.
@@ -203,8 +205,8 @@ persistence follow the
 
 ## Source and build boundary
 
-Production source will live below `roms/cpu/bdos/` and use original
-Atom-compatible assembly. `%INCLUDE` may divide the implementation into
+Production source lives at `src/bdos.asm` and uses original ATOM-compatible
+assembly. `%INCLUDE` may divide the implementation into
 modules, but the build produces one fixed resident image. Host-side generation
 or assembly helpers belong in `tools/`; direct and whole-system proofs belong
 in `test/`.

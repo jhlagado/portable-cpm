@@ -1,6 +1,6 @@
-; Triptych-owned CP/M 2.2 BDOS.
+; Portable CP/M BDOS, CP/M 2.2 interface profile.
 ;
-; This source intentionally uses the common Atom/AZM subset. Names fit Atom's
+; This source intentionally uses ATOM's portable source subset. Names fit its
 ; eight-character limit, and all code, data, and stack storage remain inside
 ; the fixed $EC00..$F9FF resident slot.
 

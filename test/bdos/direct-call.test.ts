@@ -24,13 +24,7 @@ const referenceDisk = readFileSync(
 const referenceBdos = referenceDisk.subarray(0x0800, 0x1600);
 const expectedBdosSha256 =
   "258fe1b659a979fa9adab000fd2ee27b165349179f6b5f5b8b5266ea3385ac22";
-const replacementBdosSource = resolve(
-  repositoryRoot,
-  "roms",
-  "cpu",
-  "bdos",
-  "bdos.asm",
-);
+const replacementBdosSource = resolve(repositoryRoot, "src", "bdos.asm");
 let replacementBdos: Uint8Array;
 let replacementLabels: Readonly<Record<string, number>>;
 const functionFixtureDirectory = resolve(

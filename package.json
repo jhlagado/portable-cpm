@@ -1,0 +1,28 @@
+{
+  "name": "portable-cpm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portable ATOM-authored CP/M-compatible CCP and BDOS",
+  "license": "GPL-3.0-or-later",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node tools/build-release.mjs",
+    "check:azm": "node tools/check-no-azm.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier --write \"**/*.{json,md,mjs,ts}\"",
+    "format:check": "prettier --check \"**/*.{json,md,mjs,ts}\"",
+    "test": "vitest run",
+    "check": "npm run check:azm && npm run typecheck && npm run format:check && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@jhlagado/debug80-runtime": "^0.2.0",
+    "@types/node": "^24.13.3",
+    "atom-z80": "git+https://github.com/jhlagado/atom.git#802b5c2d320bec777f427755ff2d7338e3b80a05",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.10"
+  }
+}

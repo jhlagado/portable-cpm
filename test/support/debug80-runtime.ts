@@ -4,16 +4,11 @@ import type {
   IoHandlers as Debug80IoHandlers,
   Z80Runtime as Debug80Runtime,
 } from "@jhlagado/debug80-runtime/z80/runtime";
-import type {
-  CreateZ80HostRuntime,
-  Z80HostRuntime,
-  Z80IoHandlers,
-} from "../../src/shared/z80.js";
 
 /** Uses Debug80 as an external Z80 test harness; it is not a machine dependency. */
-export const createDebug80TestRuntime: CreateZ80HostRuntime = (
-  ioHandlers: Z80IoHandlers,
-): Z80HostRuntime =>
+export const createDebug80TestRuntime = (
+  ioHandlers: Debug80IoHandlers,
+): Debug80Runtime =>
   createZ80Runtime(
     { memory: new Uint8Array(0x10000), startAddress: 0 },
     0,
@@ -21,7 +16,7 @@ export const createDebug80TestRuntime: CreateZ80HostRuntime = (
   );
 
 export interface Debug80TestHarness {
-  createRuntime: CreateZ80HostRuntime;
+  createRuntime(ioHandlers: Debug80IoHandlers): Debug80Runtime;
   runtime(): Debug80Runtime;
   captureCpuState(): CpuStateSnapshot;
 }
@@ -39,9 +34,7 @@ export function createDebug80TestHarness(options?: {
     return activeRuntime;
   };
 
-  const createRuntime: CreateZ80HostRuntime = (
-    ioHandlers: Z80IoHandlers,
-  ): Z80HostRuntime => {
+  const createRuntime = (ioHandlers: Debug80IoHandlers): Debug80Runtime => {
     activeRuntime = createZ80Runtime(
       { memory: new Uint8Array(0x10000), startAddress: 0 },
       0,
