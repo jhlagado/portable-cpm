@@ -1,6 +1,6 @@
 {
   "schema": "portable-cpm-ccp-feature-matrix-v1",
-  "publicationReady": true,
+  "publicationReady": false,
   "hardwareQualified": false,
   "oracle": {
     "path": "third_party/cpm22/cpm22.img",
@@ -79,6 +79,7 @@
         "test/ccp/scenarios/portable-extra-operands.json",
         "test/ccp/scenarios/portable-filename-boundaries.json",
         "test/ccp/scenarios/portable-drive-prefix-boundaries.json",
+        "test/ccp/parser-corpus.test.ts",
         "test/ccp/scenario-matrix.test.ts"
       ]
     },
@@ -88,6 +89,7 @@
       "evidence": [
         "test/ccp/scenarios/portable-builtin-errors.json",
         "test/ccp/portable-machine.test.ts",
+        "test/ccp/disk-failures.test.mjs",
         "test/bdos/directory-write-failure.test.ts",
         "test/bdos/direct-call.test.ts"
       ]
@@ -100,6 +102,10 @@
         "test/release-artifacts.test.mjs"
       ]
     }
+  ],
+  "pendingReleaseGates": [
+    "guest-self-assembly",
+    "alternate-resident-placement"
   ],
   "consumerQualification": {
     "triptychNativeAndWasm": "proved externally at the extraction revision",

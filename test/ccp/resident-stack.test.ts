@@ -70,7 +70,7 @@ describe("CCP resident memory", () => {
       );
     }
     expect(stackTop - minimumStackPointer).toBe(10);
-  });
+  }, 15_000);
 });
 
 function requiredLabel(

@@ -21,10 +21,14 @@ describe("CCP publication ledger", () => {
       schema: string;
       publicationReady: boolean;
       hardwareQualified: boolean;
+      pendingReleaseGates: string[];
       features: Array<{ id: string; status: string; evidence: string[] }>;
     };
     expect(matrix.schema).toBe("portable-cpm-ccp-feature-matrix-v1");
-    expect(matrix.publicationReady).toBe(true);
+    expect(matrix.publicationReady).toBe(
+      matrix.pendingReleaseGates.length === 0 &&
+        matrix.features.every((feature) => feature.status === "proved"),
+    );
     expect(matrix.hardwareQualified).toBe(false);
     expect(matrix.features.length).toBeGreaterThan(0);
     for (const feature of matrix.features) {
