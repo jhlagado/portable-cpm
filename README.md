@@ -9,7 +9,7 @@ its own BIOS implementation behind the documented call boundary; the tests use
 a small in-memory BIOS double. Triptych is the first consumer and keeps its BIOS
 and bootstrap in the Triptych repository.
 
-## Current target profile
+## Target profiles
 
 The first compatibility profile retains the placement required by Triptych:
 
@@ -20,6 +20,10 @@ The first compatibility profile retains the placement required by Triptych:
 These addresses are a target profile, not an ownership claim. The portable
 behavior is defined by the contracts in `docs/specifications/`.
 
+The `test-low-memory-v1` profile places CCP at `$C400`, BDOS at `$CC00`
+and the test BIOS at `$DA00`. It qualifies an alternate host-model layout,
+not a physical board. Both profiles use the same portable sources.
+
 ## Development
 
 Requires Node.js 20 or newer.
@@ -28,6 +32,19 @@ Requires Node.js 20 or newer.
 npm ci
 npm run check
 ```
+
+Build the default artifacts with `npm run build`. To select a different profile:
+
+```sh
+npm run build -- dist-low test-low-memory-v1
+```
+
+The output directory contains `ccp.bin`, `bdos.bin` and a manifest identifying
+the profile, load addresses and source/binary digests. No production BIOS is
+published here. Sources require the profile's EQU preamble; do not assemble
+`src/ccp.asm` or `src/bdos.asm` without it. The build tool and guest self-assembly
+test use the same prepared flat source. See
+[target profiles](docs/specifications/target-profiles.md).
 
 `npm run check` assembles the replacement BDOS with the pinned ATOM revision,
 runs the direct-call, randomized filesystem and CCP scenario contracts through

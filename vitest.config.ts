@@ -14,6 +14,7 @@ export default defineConfig({
       "test/ccp/parser-corpus.test.ts",
       "test/ccp/disk-failures.test.mjs",
       "test/ccp/self-assembly.test.mjs",
+      "test/ccp/target-profile.test.mjs",
       "test/release-artifacts.test.mjs",
     ],
   },

@@ -1,6 +1,6 @@
 {
   "schema": "portable-cpm-ccp-feature-matrix-v1",
-  "publicationReady": false,
+  "publicationReady": true,
   "hardwareQualified": false,
   "oracle": {
     "path": "third_party/cpm22/cpm22.img",
@@ -15,6 +15,14 @@
     "sha256": "d5f90f3c7cac8ad902ab4224e9f09ba344a8d30bee63dc7622d7fd1db65b2476"
   },
   "features": [
+    {
+      "id": "alternate-resident-placement",
+      "status": "proved",
+      "evidence": [
+        "test/ccp/target-profile.test.mjs",
+        "test/release-artifacts.test.mjs"
+      ]
+    },
     {
       "id": "guest-ccp-self-assembly",
       "status": "proved",
@@ -108,7 +116,7 @@
       ]
     }
   ],
-  "pendingReleaseGates": ["alternate-resident-placement"],
+  "pendingReleaseGates": [],
   "consumerQualification": {
     "triptychNativeAndWasm": "proved externally at the extraction revision",
     "esp32Hardware": "not measured"

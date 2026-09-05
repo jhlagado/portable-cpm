@@ -20,7 +20,7 @@ cover the command surface, parser and loader boundaries, file mutations and
 recovery. Separate tests prove the 48-byte CCP stack boundary and a warm boot
 after a rejected BIOS write. A Buffer-isolation regression proves that guest
 writes cannot change the caller's source disk or another session. The complete
-repository gate contains 264 tests, including 71 parser boundary cases and 64
+repository gate contains 273 tests, including 71 parser boundary cases and 64
 deterministically generated cases (seed `0x54524950`). Each parser case verifies
 disk preservation, the 16-byte stack guard, and recovery through a subsequent
 directory command. Prompt detection requires 256 quiet instruction steps so a
@@ -40,7 +40,18 @@ output with the host ATOM build, then boots that generated CCP from an exported
 disk and verifies directory access and retained file bytes. Separate tests
 reject an altered assembler artifact and prove that retargeting cannot mutate
 a caller-owned Node Buffer. This qualifies CCP self-assembly, not BDOS or
-ATOM rebuilding itself.
+ATOM rebuilding itself. Sources now receive an ordinary EQU preamble from the
+selected target profile, and guest assembly uses that same prepared text.
+
+The lower-memory host profile places CCP/BDOS/test BIOS at `$C400`/`$CC00`/`$DA00`.
+It passes file operations, export/reopen, failed-write warm-boot recovery,
+SAVE's last valid and first invalid page counts, and loader tests one record
+below, exactly at, and one record above the transient capacity. The default
+profile still has exactly the qualified binary hashes below. Both profiles
+pass duplicate-build byte and manifest comparisons. These eight profile tests
+and the additional alternate release-build test complete the recorded standalone
+CCP qualification gates; they do not complete Triptych integration or release
+publication.
 
 The initial `triptych-cpu-v0.1` output is:
 
@@ -53,8 +64,8 @@ These are host-model results, not ESP32 measurements. The retained CP/M disk is
 black-box compatibility evidence under its recorded grant, not implementation
 source. The standalone gate currently checks transcripts and selected output
 files; it does not replay the retained terminal snapshots or Triptych disk
-digests. Alternate resident placement still needs standalone qualification before the
-first OS release. Triptych's existing integration proofs retain that evidence
-in the meantime.
+digests. Triptych's existing integration proofs retain that evidence. Release
+provenance review, immutable publication and migration of Triptych to consume
+the release are subsequent integration work.
 
 Verification command: `npm run check`.

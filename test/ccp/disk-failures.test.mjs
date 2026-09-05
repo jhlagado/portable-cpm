@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { describe, it } from "vitest";
-import { assembleAtomBinary } from "../../tools/lib/assemble-atom.mjs";
+import { assembleProfiledBinary as assembleAtomBinary } from "../../tools/lib/target-profiles.mjs";
 import {
   installCpm22File,
   readCpm22File,

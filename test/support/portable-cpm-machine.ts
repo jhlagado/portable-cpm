@@ -1,13 +1,14 @@
 import type { CpuStateSnapshot } from "@jhlagado/debug80-runtime/z80/runtime";
 
 import { createDebug80TestHarness } from "./debug80-runtime.js";
+import {
+  targetProfile,
+  DEFAULT_PROFILE,
+} from "../../tools/lib/target-profiles.mjs";
 
 const MEMORY_BYTES = 0x10000;
-const CCP_BASE = 0xe400;
 const CCP_BYTES = 0x0800;
-const BDOS_BASE = 0xec00;
 const BDOS_BYTES = 0x0e00;
-const BIOS_BASE = 0xfa00;
 const BIOS_BYTES = 0x0400;
 const RECORD_BYTES = 128;
 
@@ -29,6 +30,7 @@ export interface PortableCpmMachineOptions {
   bios: Uint8Array;
   disk: Uint8Array;
   writable?: boolean;
+  profileId?: string;
 }
 
 /** Runs CCP and BDOS through an ATOM-built test BIOS and byte-level host I/O. */
@@ -53,7 +55,9 @@ export class PortableCpmMachine {
     bios,
     disk,
     writable = true,
+    profileId = DEFAULT_PROFILE,
   }: PortableCpmMachineOptions) {
+    const profile = targetProfile(profileId);
     assertLength(ccp, CCP_BYTES, "CCP");
     assertLength(bdos, BDOS_BYTES, "BDOS");
     assertLength(bios, BIOS_BYTES, "test BIOS");
@@ -73,11 +77,11 @@ export class PortableCpmMachine {
     });
     this.#memory = this.#runtime.hardware.memory;
     this.#memory.fill(0);
-    this.#memory.set(ccp, CCP_BASE);
-    this.#memory.set(bdos, BDOS_BASE);
-    this.#memory.set(bios, BIOS_BASE);
+    this.#memory.set(ccp, profile.ccp);
+    this.#memory.set(bdos, profile.bdos);
+    this.#memory.set(bios, profile.bios);
     const state = this.#runtime.captureCpuState();
-    state.pc = BIOS_BASE;
+    state.pc = profile.bios;
     state.sp = 0xffff;
     state.halted = false;
     this.#runtime.restoreCpuState(state);

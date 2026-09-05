@@ -2,7 +2,10 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { beforeAll, describe, expect, it } from "vitest";
-import { assembleAtomBinary } from "../../tools/lib/assemble-atom.mjs";
+import {
+  assembleProfiledBinary as assembleAtomBinary,
+  prepareProfiledSource,
+} from "../../tools/lib/target-profiles.mjs";
 import {
   installCpm22File,
   readCpm22File,
@@ -19,7 +22,9 @@ beforeAll(async () => {
     assembleAtomBinary(resolve(root, "src/bdos.asm")),
     assembleAtomBinary(resolve(root, "test/fixtures/test-bios.asm")),
     readFile(resolve(root, "third_party/cpm22/cpm22.img")),
-    readFile(resolve(root, "src/ccp.asm"), "utf8"),
+    prepareProfiledSource(resolve(root, "src/ccp.asm")).then(
+      (input) => input.prepared,
+    ),
   ]);
 });
 

@@ -4,10 +4,10 @@
 ; boundary over test-only byte ports so CCP and BDOS can be qualified without
 ; importing Triptych hardware code.
 
-        ORG     $FA00
+        ORG     BIOSBAS
 
-CCPBASE EQU     $E400
-BDOSENT EQU     $EC06
+CCPBASE EQU     CCPBAS
+BDOSENT EQU     BDOSBAS+6
 WARMREC EQU     44
 TRKRECS EQU     26
 RECBYTS EQU     128
@@ -290,5 +290,4 @@ BOOTREC: DB     0
 BOOTLEFT: DB    0
 STACK:  DS      64,0
 STACKTP:
-        DS      $FE00-$,0
-
+        DS      BIOSEND-$,0
