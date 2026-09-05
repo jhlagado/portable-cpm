@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -10,6 +10,28 @@ import { targetProfile } from "../tools/lib/target-profiles.mjs";
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
 describe("portable CP/M release artifacts", () => {
+  it("rejects a lockfile that selects a different assembler revision", async () => {
+    const fixture = await mkdtemp(join(tmpdir(), "portable-cpm-bad-lock-"));
+    const root = resolve(import.meta.dirname, "..");
+    try {
+      await cp(join(root, "src"), join(fixture, "src"), { recursive: true });
+      await cp(join(root, "package.json"), join(fixture, "package.json"));
+      const lock = JSON.parse(
+        await readFile(join(root, "package-lock.json"), "utf8"),
+      );
+      lock.packages["node_modules/atom-z80"].resolved =
+        "git+https://github.com/jhlagado/atom.git#" + "0".repeat(40);
+      await writeFile(join(fixture, "package-lock.json"), JSON.stringify(lock));
+      await expect(
+        buildPortableCpmArtifacts({
+          repositoryRoot: fixture,
+          outputDirectory: join(fixture, "out"),
+        }),
+      ).rejects.toThrow(/assembler.*lockfile/i);
+    } finally {
+      await rm(fixture, { recursive: true, force: true });
+    }
+  }, 15_000);
   for (const profileId of ["triptych-cpu-v0.1", "test-low-memory-v1"]) {
     it(`builds deterministic CCP and BDOS binaries for ${profileId}`, async () => {
       const profile = targetProfile(profileId);

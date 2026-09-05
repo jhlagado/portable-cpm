@@ -9,7 +9,6 @@ import {
   DEFAULT_PROFILE,
 } from "./lib/target-profiles.mjs";
 
-const ATOM_REVISION = "802b5c2d320bec777f427755ff2d7338e3b80a05";
 const COMPONENTS = [
   {
     id: "ccp",
@@ -33,6 +32,29 @@ export async function buildPortableCpmArtifacts({
   profileId = DEFAULT_PROFILE,
 }) {
   const profile = targetProfile(profileId);
+  const [packageManifest, lock] = await Promise.all(
+    ["package.json", "package-lock.json"].map(async (name) =>
+      JSON.parse(await readFile(join(repositoryRoot, name), "utf8")),
+    ),
+  );
+  const revision =
+    /^git\+https:\/\/github\.com\/jhlagado\/atom\.git#([0-9a-f]{40})$/.exec(
+      packageManifest.devDependencies?.["atom-z80"],
+    )?.[1];
+  const lockedAtom = lock.packages?.["node_modules/atom-z80"];
+  const lockedRevision =
+    /^git\+(?:https:\/\/github\.com\/|ssh:\/\/git@github\.com\/)jhlagado\/atom\.git#([0-9a-f]{40})$/.exec(
+      lockedAtom?.resolved,
+    )?.[1];
+  if (
+    revision === undefined ||
+    revision !== lockedRevision ||
+    !lockedAtom?.integrity
+  ) {
+    throw new Error(
+      "assembler package pin and lockfile must agree on an exact ATOM revision and integrity",
+    );
+  }
   await mkdir(outputDirectory, { recursive: true });
   const built = [];
   for (const template of COMPONENTS) {
@@ -69,11 +91,12 @@ export async function buildPortableCpmArtifacts({
 
   const manifest = {
     schema: "portable-cpm-artifacts-v1",
-    version: "0.1.0",
+    version: packageManifest.version,
     targetProfile: profileId,
     atom: {
       repository: "https://github.com/jhlagado/atom",
-      revision: ATOM_REVISION,
+      revision,
+      packageIntegrity: lockedAtom.integrity,
     },
     components: built,
   };
