@@ -11,6 +11,7 @@ export default defineConfig({
       "test/ccp/feature-matrix.test.ts",
       "test/ccp/scenario-matrix.test.ts",
       "test/ccp/resident-stack.test.ts",
+      "test/ccp/transient-dma-stack.test.ts",
       "test/ccp/parser-corpus.test.ts",
       "test/ccp/disk-failures.test.mjs",
       "test/ccp/self-assembly.test.mjs",

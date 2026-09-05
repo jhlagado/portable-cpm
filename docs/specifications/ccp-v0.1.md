@@ -111,6 +111,16 @@ FCB2=00|BAZ     |QUX
 Its ordinary `RET` reaches the BIOS warm-boot vector and returns to a fresh
 prompt.
 
+The supplied entry stack is within the CCP resident reservation, outside both
+the transient load area and default DMA record `$0080..$00FF`. The reservation
+is 48 bytes: the warm-boot return word occupies two bytes, leaving 46 bytes for
+application pushes and call return addresses. A program requiring more stack
+must establish its own storage. To return with `RET` after using a private
+stack, it must restore the incoming stack pointer without changing the supplied
+return word. Programs may use the entire default DMA record for BDOS reads;
+that use must not damage the entry return context. The numeric stack address
+depends on the named resident profile and is not a portable application constant.
+
 ## Built-in command surface
 
 | Command     | Required behavior                                                    |

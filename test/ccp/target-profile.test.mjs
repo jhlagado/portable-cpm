@@ -61,7 +61,7 @@ describe("named resident profiles", () => {
     for (const [component, expected] of [
       [
         "ccp",
-        "d5f90f3c7cac8ad902ab4224e9f09ba344a8d30bee63dc7622d7fd1db65b2476",
+        "e74d61f096f6c9de01d77cd990a3255c4f0d46d771992a5e54b7993ed51fe18b",
       ],
       [
         "bdos",
