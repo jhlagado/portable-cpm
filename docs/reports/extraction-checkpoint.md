@@ -20,7 +20,7 @@ cover the command surface, parser and loader boundaries, file mutations and
 recovery. Separate tests prove the 48-byte CCP stack boundary and a warm boot
 after a rejected BIOS write. A Buffer-isolation regression proves that guest
 writes cannot change the caller's source disk or another session. The complete
-repository gate contains 261 tests, including 71 parser boundary cases and 64
+repository gate contains 264 tests, including 71 parser boundary cases and 64
 deterministically generated cases (seed `0x54524950`). Each parser case verifies
 disk preservation, the 16-byte stack guard, and recovery through a subsequent
 directory command. Prompt detection requires 256 quiet instruction steps so a
@@ -34,6 +34,14 @@ the other five cases require the whole backing image to remain unchanged.
 The instruction-by-instruction stack test has a 15-second wall-clock allowance
 for concurrent suite execution; its guest instruction bounds remain unchanged.
 
+The guest self-assembly gate runs provenance-checked ATOM.COM through the local
+test BIOS and assembles the current CCP source. It compares the entire 2,048-byte
+output with the host ATOM build, then boots that generated CCP from an exported
+disk and verifies directory access and retained file bytes. Separate tests
+reject an altered assembler artifact and prove that retargeting cannot mutate
+a caller-owned Node Buffer. This qualifies CCP self-assembly, not BDOS or
+ATOM rebuilding itself.
+
 The initial `triptych-cpu-v0.1` output is:
 
 | Component | Origin  | Entry   | Bytes | SHA-256                                                            |
@@ -45,7 +53,7 @@ These are host-model results, not ESP32 measurements. The retained CP/M disk is
 black-box compatibility evidence under its recorded grant, not implementation
 source. The standalone gate currently checks transcripts and selected output
 files; it does not replay the retained terminal snapshots or Triptych disk
-digests. Self-assembly and alternate resident placement still need standalone qualification before the
+digests. Alternate resident placement still needs standalone qualification before the
 first OS release. Triptych's existing integration proofs retain that evidence
 in the meantime.
 

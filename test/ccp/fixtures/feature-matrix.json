@@ -16,6 +16,11 @@
   },
   "features": [
     {
+      "id": "guest-ccp-self-assembly",
+      "status": "proved",
+      "evidence": ["test/ccp/self-assembly.test.mjs"]
+    },
+    {
       "id": "boot-prompt-and-command-tail",
       "status": "proved",
       "evidence": [
@@ -103,10 +108,7 @@
       ]
     }
   ],
-  "pendingReleaseGates": [
-    "guest-self-assembly",
-    "alternate-resident-placement"
-  ],
+  "pendingReleaseGates": ["alternate-resident-placement"],
   "consumerQualification": {
     "triptychNativeAndWasm": "proved externally at the extraction revision",
     "esp32Hardware": "not measured"
