@@ -12,6 +12,13 @@ profile changes page zero, the `$0100` transient entry, disk geometry, or BDOS
 function semantics. SAVE and transient loader bounds derive from the selected
 CCP origin. The reserved regions must fit within the Z80 address space.
 
+`triptych-cpu-v0.1-8m-ab` places CCP at `$E300`, BDOS at `$EB00` and the BIOS
+call table at `$F900`, retaining the 2,048/3,584/1,024-byte component capacities.
+Its COM load ceiling is `$E300` exclusive. The machine owns BIOS workspace and
+any runtime lifetime overlap; this OS placement does not itself qualify two
+drives, a physical board, or arbitrary transient-program stacks. Build artifacts
+and manifests for this profile are distinct from the unchanged default profile.
+
 The build prepends ordinary ATOM EQU statements to the portable source and
 assembles that flat text. The same text can be installed on a guest disk for
 self-assembly. This keeps guest assembly independent of host preprocessing.

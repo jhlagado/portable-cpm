@@ -24,6 +24,12 @@ The `test-low-memory-v1` profile places CCP at `$C400`, BDOS at `$CC00`
 and the test BIOS at `$DA00`. It qualifies an alternate host-model layout,
 not a physical board. Both profiles use the same portable sources.
 
+The `triptych-cpu-v0.1-8m-ab` profile places CCP at `$E300`, BDOS at `$EB00`
+and the BIOS call table at `$F900`, with the same component capacities. It
+provides separately identified OS artifacts for Triptych's A/B integration.
+The machine BIOS and application-stack lifetime qualification belong to
+Triptych; selecting this profile alone does not establish those results.
+
 ## Development
 
 Requires Node.js 20 or newer.
@@ -54,6 +60,9 @@ harness only.
 
 The [8 MiB allocation-bounds report](docs/reports/eight-mib-allocation-bounds.md)
 records the large-geometry tests, resident-byte cost and qualification limits.
+The [multi-drive report](docs/reports/multiple-drive-bdos.md) records explicit
+FCB drive selection, default-drive queries, complete allocation-vector reset,
+and two-drive 8 MiB boundary tests.
 
 The retained disk under `third_party/cpm22/` is black-box compatibility
 evidence governed by its accompanying provenance and grant. It is not source

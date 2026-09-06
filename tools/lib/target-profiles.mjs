@@ -7,6 +7,7 @@ export const DEFAULT_PROFILE = "triptych-cpu-v0.1";
 const ORIGINS = Object.freeze({
   "triptych-cpu-v0.1": 0xe400,
   "test-low-memory-v1": 0xc400,
+  "triptych-cpu-v0.1-8m-ab": 0xe300,
   "test-multi-drive-workspace-v1": 0xe300,
 });
 

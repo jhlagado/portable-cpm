@@ -1,6 +1,6 @@
 # Multi-drive BDOS qualification
 
-Date: 2026-09-06. Status: local, unpublished work following version 0.1.2.
+Date: 2026-09-06. Status: release candidate 0.1.3; not yet published.
 The explicit-FCB-drive regression is fixed. The portable interface tests cover
 two full-size drives; machine integration remains a separate gate.
 
@@ -116,6 +116,13 @@ The measured peak stack use for these six cases is 16 of 64 bytes.
 An independent reviewer reran all 52 new drive tests and checked fixture
 address separation, deep-copy snapshots, failure comparisons and the combined
 source changes; no actionable findings remained in this slice.
+
+The subsequent named `triptych-cpu-v0.1-8m-ab` profile places CCP/BDOS at
+E300/EB00 and its BIOS call boundary at F900. Two additional tests qualify
+deterministic profiled artifacts, cold boot, exact COM load bounds and warm
+reload through the independent test BIOS. The resulting complete gate passes
+361 tests. This profile retains the original component capacities; it is
+distinct from the larger diagnostic workspace used earlier.
 
 ## Remaining integration
 

@@ -32,7 +32,11 @@ describe("portable CP/M release artifacts", () => {
       await rm(fixture, { recursive: true, force: true });
     }
   }, 15_000);
-  for (const profileId of ["triptych-cpu-v0.1", "test-low-memory-v1"]) {
+  for (const profileId of [
+    "triptych-cpu-v0.1",
+    "test-low-memory-v1",
+    "triptych-cpu-v0.1-8m-ab",
+  ]) {
     it(`builds deterministic CCP and BDOS binaries for ${profileId}`, async () => {
       const profile = targetProfile(profileId);
       const firstDirectory = await mkdtemp(
