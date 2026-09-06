@@ -63,6 +63,21 @@ describe("portable CP/M release artifacts", () => {
 
         expect(first).toEqual(second);
         expect(first.schema).toBe("portable-cpm-artifacts-v1");
+        const packageManifest = JSON.parse(
+          await readFile(
+            resolve(import.meta.dirname, "../package.json"),
+            "utf8",
+          ),
+        );
+        const lock = JSON.parse(
+          await readFile(
+            resolve(import.meta.dirname, "../package-lock.json"),
+            "utf8",
+          ),
+        );
+        expect(first.version).toBe(packageManifest.version);
+        expect(lock.version).toBe(packageManifest.version);
+        expect(lock.packages[""].version).toBe(packageManifest.version);
         expect(first.targetProfile).toBe(profileId);
         expect(first.atom.revision).toBe(
           "802b5c2d320bec777f427755ff2d7338e3b80a05",
