@@ -52,6 +52,9 @@ the external Debug80 Z80 runtime, checks formatting and type safety, and rejects
 accidental historical-assembler imports. Debug80 Runtime is a development
 harness only.
 
+The [8 MiB allocation-bounds report](docs/reports/eight-mib-allocation-bounds.md)
+records the large-geometry tests, resident-byte cost and qualification limits.
+
 The retained disk under `third_party/cpm22/` is black-box compatibility
 evidence governed by its accompanying provenance and grant. It is not source
 for this implementation.
