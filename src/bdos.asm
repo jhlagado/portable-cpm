@@ -56,7 +56,17 @@ BENTRY:
         LD      E,(HL)
         INC     HL
         LD      D,(HL)
-        EX      DE,HL
+        ; Table words are resident-relative offsets. Bit 15 requests FCB
+        ; drive binding; no flag is hidden in an absolute machine address.
+        BIT     7,D
+        RES     7,D
+        LD      HL,BDOSBAS
+        ADD     HL,DE
+        JR      Z,DISPATCH
+        PUSH    HL
+        CALL    FCBSEL
+        POP     HL
+DISPATCH:
         LD      DE,(PARAM)
         JP      (HL)
 
@@ -66,9 +76,6 @@ RETZERO:
 RETA:
         LD      L,A
         LD      H,0
-        LD      B,H
-        LD      SP,(OLDSP)
-        RET
 
 RETWORD:
         LD      A,L
@@ -349,18 +356,60 @@ FNRESET:
         LD      C,L
         CALL    BIODMA
         CALL    LOGIN
-        JP      RETZERO
+        JR      SETDEF
 
 FNSEL:
         LD      A,(PARAM)
+        CALL    SELDRV
+
+; Publish a logical default only after BIOS selection succeeds. Retained
+; pointers let functions 27/31 query that default without replacing an active
+; explicit-drive search's directory buffer or cursor.
+SETDEF:
+        LD      A,(CURDRV)
+        LD      (DEFDRV),A
+        LD      HL,(DPBPTR)
+        LD      (DEFDPB),HL
+        LD      HL,(ALVPTR)
+        LD      (DEFALV),HL
+        JP      RETZERO
+
+; A is a zero-based physical drive. Bind its geometry before any file access.
+; Clobbers AF/BC/DE/HL/IX. Same-drive access must still honor reset/login state.
+; An invalid or absent drive takes the fatal selection path, never a return.
+SELDRV:
+        CP      16
+        JP      NC,SELFAIL
         LD      B,A
         LD      A,(CURDRV)
         CP      B
-        JP      Z,RETZERO
         LD      A,B
         LD      (CURDRV),A
-        CALL    LOGIN
-        JP      RETZERO
+        JP      NZ,LOGIN
+        CALL    LOGTEST
+        RET     NZ
+        JP      LOGIN
+
+; PARAM names the caller FCB; its drive byte is never rewritten. C still
+; identifies the dispatched service. Zero means logical default; 1..16 means
+; A..P. Only Search First admits '?' as a raw-directory request.
+FCBSEL:
+        LD      HL,(PARAM)
+        LD      A,(HL)
+        CP      '?'
+        JR      NZ,FCBORD
+        LD      A,C
+        CP      17
+        JP      NZ,SELFAIL
+        XOR     A
+FCBORD:
+        OR      A
+        JR      NZ,FCBEXPL
+        LD      A,(DEFDRV)
+        JP      SELDRV
+FCBEXPL:
+        DEC     A
+        JP      SELDRV
 
 ; Open uses the same public-directory iterator as search, then imports only
 ; the directory-owned FCB fields. Bit 7 of S2 marks the FCB unmodified, which
@@ -377,8 +426,7 @@ CLOSEFCB:
         LD      HL,(PARAM)
         LD      DE,14
         ADD     HL,DE
-        LD      A,(HL)
-        AND     $80
+        BIT     7,(HL)
         JR      Z,CLOSEDIR
         XOR     A
         RET
@@ -409,6 +457,14 @@ FINDEXCT:
         JP      FINDENT
 
 FNSRCHF:
+        LD      HL,(PARAM)
+        LD      A,(HL)
+        CP      '?'
+        LD      A,5
+        JR      Z,SETSRCH
+        LD      DE,14
+        ADD     HL,DE
+        LD      (HL),0
         XOR     A
 
 SETSRCH:
@@ -420,8 +476,7 @@ SETSRCH:
         JP      RETA
 
 FNSRCHN:
-        XOR     A
-        LD      (OPENMOD),A
+        ; Continue the saved search mode; DE is not an FCB argument here.
         CALL    FINDENT
         JP      RETA
 
@@ -644,8 +699,7 @@ WRITEBLK:
         RET
 
 WRITEBAD:
-        CALL    BADSECT
-        RET
+        JP      BADSECT
 
 WRITEEND:
         LD      A,1
@@ -1116,7 +1170,7 @@ FNLOGIN:
         JP      RETWORD
 
 FNCURDSK:
-        LD      A,(CURDRV)
+        LD      A,(DEFDRV)
         JP      RETA
 
 FNSETDMA:
@@ -1128,11 +1182,12 @@ FNSETDMA:
         JP      RETZERO
 
 FNGETALV:
-        LD      HL,(ALVPTR)
+        LD      HL,(DEFALV)
         JP      RETWORD
 
 FNWRPROT:
-        CALL    DRVMASK
+        LD      A,(DEFDRV)
+        CALL    MASKA
         EX      DE,HL
         LD      HL,(ROVEC)
         LD      A,L
@@ -1149,7 +1204,7 @@ FNGETRO:
         JP      RETWORD
 
 FNGETDPB:
-        LD      HL,(DPBPTR)
+        LD      HL,(DEFDPB)
         JP      RETWORD
 
 FNUSER:
@@ -1341,7 +1396,10 @@ FINDENT:
         LD      DE,(DIRUSED)
         LD      A,(OPENMOD)
         CP      3
+        JR      Z,FULLDIR
+        CP      5
         JR      NZ,FINDLIM
+FULLDIR:
         LD      DE,(DIRCNT)
 
 FINDLIM:
@@ -1381,7 +1439,10 @@ FOUNDIT:
         LD      (SRCHIDX),HL
         LD      A,(OPENMOD)
         OR      A
+        JR      Z,COPYDIR
+        CP      5
         JR      NZ,OPENHIT
+COPYDIR:
         LD      HL,(DIRPTR)
         LD      DE,(CURDMA)
         LD      BC,128
@@ -1420,6 +1481,8 @@ NOENTRY:
 ; Open also requires the requested logical extent.
 MATCHFCB:
         LD      A,(OPENMOD)
+        CP      5
+        JR      Z,ISMATCH
         CP      3
         JR      NZ,MATCHUSR
         LD      A,(HL)
@@ -1513,8 +1576,7 @@ READDIR:
         POP     AF
         OR      A
         JP      NZ,RDFAIL
-        CALL    ADVSEC
-        RET
+        JP      ADVSEC
 
 ; Write the current directory buffer back to the exact record READDIR loaded.
 WRITEDIR:
@@ -1575,16 +1637,25 @@ SECSAME:
         LD      (CURSEC),HL
         RET
 
-; Select the current drive, capture its public tables, initialize its
-; allocation vector, and reconstruct allocations from directory records.
+; Select the current drive and capture its public tables. Rescan directory
+; counters on each selection, but clear allocations only on first login/reset:
+; a logged-in vector also owns reservations in open, not-yet-closed FCBs.
 LOGIN:
+        CALL    LOGTEST
+        PUSH    AF
+        LD      E,0
+        JR      Z,LOGSEL
+        INC     E
+LOGSEL:
         LD      A,(CURDRV)
         LD      C,A
-        LD      E,0
         CALL    BIOSEL
         LD      A,H
         OR      L
-        JP      Z,SELFAIL
+        JR      NZ,LOGOK
+        POP     AF
+        JP      SELFAIL
+LOGOK:
         LD      (DPHPTR),HL
 
         LD      E,(HL)
@@ -1592,8 +1663,8 @@ LOGIN:
         LD      D,(HL)
         LD      (XLTPTR),DE
 
-        LD      HL,(DPHPTR)
-        LD      BC,8
+        ; HL still addresses DPH+1 after reading the translation pointer.
+        LD      BC,7
         ADD     HL,BC
         LD      E,(HL)
         INC     HL
@@ -1612,6 +1683,8 @@ LOGIN:
         LD      D,(HL)
         LD      (ALVPTR),DE
 
+        POP     AF
+        CALL    Z,INITALV
         CALL    DRVMASK
         EX      DE,HL
         LD      HL,(LOGINV)
@@ -1623,8 +1696,6 @@ LOGIN:
         LD      H,A
         LD      (LOGINV),HL
 
-        CALL    INITALV
-        CALL    BIOHOM
         LD      HL,0
         LD      (DIRCNT),HL
         LD      (DIRUSED),HL
@@ -1643,15 +1714,10 @@ LOGIN:
         INC     HL
         LD      (DIRLEFT),HL
 
-        LD      HL,(DPBPTR)
-        LD      BC,13
-        ADD     HL,BC
-        LD      E,(HL)
-        INC     HL
-        LD      D,(HL)
-        LD      (CURTRK),DE
-        LD      HL,0
-        LD      (CURSEC),HL
+        ; Binding a disk replaces directory iteration state. Reuse the same
+        ; initial position as a new file search; default-pointer queries do
+        ; not enter LOGIN and therefore retain their active search position.
+        CALL    NEWSRCH
 
 DIRSCAN:
         LD      HL,(DIRLEFT)
@@ -1683,17 +1749,15 @@ INITALV:
         RR      C
         INC     BC
         LD      HL,(ALVPTR)
-        XOR     A
 
 CLRAVL:
-        LD      (HL),A
+        ; Test the remaining count directly. Restoring AF here would restore
+        ; the old Z flag and stop after the first allocation-vector byte.
+        LD      (HL),0
         INC     HL
         DEC     BC
-        PUSH    AF
         LD      A,B
         OR      C
-        LD      D,A
-        POP     AF
         JR      NZ,CLRAVL
 
         LD      HL,(DPBPTR)
@@ -1883,11 +1947,24 @@ CHKBLK:
         JP      C,BADSECT
         RET
 
+; Z means the current drive needs its allocation vector rebuilt. The BIOS
+; receives the normalized result separately in E; the mask itself may be wide.
+LOGTEST:
+        CALL    DRVMASK
+        LD      DE,(LOGINV)
+        LD      A,L
+        AND     E
+        LD      L,A
+        LD      A,H
+        AND     D
+        OR      L
+        RET
+
 DRVMASK:
         LD      A,(CURDRV)
+MASKA:
         LD      B,A
         LD      HL,1
-        LD      A,B
         OR      A
         RET     Z
 
@@ -2038,8 +2115,7 @@ CHKKEY:
         CALL    GETCHAR
         CP      CTRLS
         JR      NZ,CHKPRN
-        CALL    GETCHAR
-        RET
+        JP      GETCHAR
 
 CHKPRN:
         CP      CTRLP
@@ -2061,13 +2137,21 @@ ERASE1:
         JP      COLBACK
 
 FNTAB:
-        DW      FNZERO,FNCIN,FNCOUT,FNREAD,FNPUNCH,FNLIST,FNDIRECT
-        DW      FNGETIO,FNSETIO,FNPRINT,FNLINE,FNSTAT,FNVERS
-        DW      FNRESET,FNSEL,FNOPEN,FNCLSE,FNSRCHF,FNSRCHN,FNDELETE
-        DW      FNREADSQ,FNWRITE,FNMAKE,FNRENAME,FNLOGIN,FNCURDSK,FNSETDMA
-        DW      FNGETALV,FNWRPROT,FNGETRO,FNATTR,FNGETDPB,FNUSER
-        DW      FNRREAD,FNRWRITE,FNSIZE,FNSETRR,FNRESETD,RETZERO
-        DW      RETZERO,FNWRZERO
+        DW      FNZERO-BDOSBAS,FNCIN-BDOSBAS,FNCOUT-BDOSBAS
+        DW      FNREAD-BDOSBAS,FNPUNCH-BDOSBAS,FNLIST-BDOSBAS,FNDIRECT-BDOSBAS
+        DW      FNGETIO-BDOSBAS,FNSETIO-BDOSBAS,FNPRINT-BDOSBAS
+        DW      FNLINE-BDOSBAS,FNSTAT-BDOSBAS,FNVERS-BDOSBAS
+        DW      FNRESET-BDOSBAS,FNSEL-BDOSBAS
+        DW      FNOPEN-BDOSBAS+$8000,FNCLSE-BDOSBAS+$8000,FNSRCHF-BDOSBAS+$8000
+        DW      FNSRCHN-BDOSBAS,FNDELETE-BDOSBAS+$8000
+        DW      FNREADSQ-BDOSBAS+$8000,FNWRITE-BDOSBAS+$8000
+        DW      FNMAKE-BDOSBAS+$8000,FNRENAME-BDOSBAS+$8000
+        DW      FNLOGIN-BDOSBAS,FNCURDSK-BDOSBAS,FNSETDMA-BDOSBAS
+        DW      FNGETALV-BDOSBAS,FNWRPROT-BDOSBAS,FNGETRO-BDOSBAS
+        DW      FNATTR-BDOSBAS+$8000,FNGETDPB-BDOSBAS,FNUSER-BDOSBAS
+        DW      FNRREAD-BDOSBAS+$8000,FNRWRITE-BDOSBAS+$8000,FNSIZE-BDOSBAS+$8000
+        DW      FNSETRR-BDOSBAS,FNRESETD-BDOSBAS,RETZERO-BDOSBAS
+        DW      RETZERO-BDOSBAS,FNWRZERO-BDOSBAS+$8000
 
 OLDSP:  DW      0
 PARAM:  DW      0
@@ -2079,6 +2163,9 @@ LINPTR: DW      0
 LINMAX: DB      0
 LINCNT: DB      0
 CURDRV: DB      0
+DEFDRV: DB      0
+DEFDPB: DW      0
+DEFALV: DW      0
 USERNO: DB      0
 LOGINV: DW      0
 ROVEC:  DW      0

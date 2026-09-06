@@ -7,6 +7,8 @@ export default defineConfig({
       "test/bdos/direct-call.test.ts",
       "test/bdos/directory-write-failure.test.ts",
       "test/bdos/eight-mib.test.ts",
+      "test/bdos/eight-mib-multiple-drive.test.ts",
+      "test/bdos/multiple-drive.test.ts",
       "test/bdos/randomized-filesystem.test.ts",
       "test/ccp/portable-machine.test.ts",
       "test/ccp/feature-matrix.test.ts",

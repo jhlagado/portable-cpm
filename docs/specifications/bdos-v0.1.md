@@ -159,6 +159,36 @@ The observable filesystem model includes:
 - 128-byte logical records, extents, record counts, and allocation blocks; and
 - search-first/search-next continuation state.
 
+### Default and explicitly addressed drives
+
+Function 14 selects the logical default (0=A through 15=P). An FCB drive byte
+of zero refers to that default; values 1 through 16 address A through P
+explicitly without changing the default reported by function 25. Resolve the
+drive before checking its write protection, reading its directory, interpreting
+its allocation map or accessing a file record. A rename uses the source FCB's
+drive; the second filename does not request a cross-drive move.
+
+Functions 27 and 31 return the default drive's allocation-vector and DPB
+addresses, and function 28 protects the default drive. These operations must
+not accidentally act on the drive used by the last explicit file request.
+The supported BIOS supplies resident per-drive allocation vectors and stable
+parameter-table addresses. An address query does not validate the allocation
+vector or implicitly undo a pending function-37 reset. Subsequent disk access
+must rebuild a reset drive's vector, even if that drive is already selected.
+
+Function 18 continues the preceding search; its DE register is not a new FCB
+argument. Search continuation survives console calls, DMA changes, current
+drive/vector queries, and default DPB/allocation-address queries. This does
+not promise continuation across intervening file operations, disk selection,
+disk reset or user changes, which reuse or invalidate directory state.
+Search First with a `?` drive byte scans the default directory, including
+other users and free entries through its final slot. Ordinary Search First
+clears S2. Other file functions do not accept an ambiguous drive byte.
+
+These requirements are interface acceptance criteria, not a statement that
+every released binary already satisfies them. Qualification status is recorded
+in [the multi-drive report](../reports/multiple-drive-bdos.md).
+
 Directory and allocation updates must be published through BIOS sector writes.
 A failed or rejected operation must leave unrelated directory entries,
 allocation bits, FCB fields, and data records unchanged. A BIOS may flush each

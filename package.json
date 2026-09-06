@@ -1,6 +1,6 @@
 {
   "name": "portable-cpm",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "description": "Portable ATOM-authored CP/M-compatible CCP and BDOS",
