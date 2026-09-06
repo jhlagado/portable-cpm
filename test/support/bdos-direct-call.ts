@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 
 import { createDebug80TestHarness } from "./debug80-runtime.js";
 import {
+  targetProfile,
+  DEFAULT_PROFILE,
+} from "../../tools/lib/target-profiles.mjs";
+import {
   BdosBiosDiskDouble,
   type BdosBiosDiskFixture,
   type BdosBiosDiskSnapshot,
@@ -11,8 +15,6 @@ const MEMORY_BYTES = 0x10000;
 const WARM_BOOT_VECTOR = 0x0000;
 const CALLER_ADDRESS = 0x0100;
 const BDOS_VECTOR = 0x0005;
-const BDOS_BASE = 0xec00;
-const BDOS_ENTRY = 0xec06;
 const BDOS_LIMIT = 0xfa00;
 const BIOS_BASE = 0xfa00;
 const BIOS_ENTRIES = 17;
@@ -294,10 +296,18 @@ function biosResponseFor(
 function createBdosDirectRunner(
   bdos: Uint8Array,
   biosDiskFixture?: BdosBiosDiskFixture,
+  profileId = DEFAULT_PROFILE,
 ): (fixture: BdosDirectCallFixture) => BdosDirectCallResult {
-  if (bdos.length !== BDOS_LIMIT - BDOS_BASE) {
+  const profile = targetProfile(profileId);
+  const bdosBase = profile.bdos;
+  if (profile.bios !== BIOS_BASE) {
     throw new Error(
-      `BDOS must fill the fixed ${BDOS_LIMIT - BDOS_BASE}-byte resident slot`,
+      "direct-call BIOS stubs require the explicit FA00 test boundary",
+    );
+  }
+  if (bdos.length !== BDOS_LIMIT - bdosBase) {
+    throw new Error(
+      `BDOS must fill the ${profileId} ${BDOS_LIMIT - bdosBase}-byte resident slot`,
     );
   }
 
@@ -306,12 +316,12 @@ function createBdosDirectRunner(
   const runtime = harness.runtime();
   const memory = runtime.hardware.memory;
   memory.fill(0);
-  memory.set(bdos, BDOS_BASE);
+  memory.set(bdos, bdosBase);
   memory.set(
     [0xc3, (BIOS_BASE + 3) & 0xff, (BIOS_BASE + 3) >>> 8],
     WARM_BOOT_VECTOR,
   );
-  memory.set([0xc3, BDOS_ENTRY & 0xff, BDOS_ENTRY >>> 8], BDOS_VECTOR);
+  memory.set([0xc3, (bdosBase + 6) & 0xff, (bdosBase + 6) >>> 8], BDOS_VECTOR);
   memory.set([0xcd, BDOS_VECTOR, 0x00, 0x76], CALLER_ADDRESS);
 
   for (let entry = 0; entry < BIOS_ENTRIES; entry += 1) {
@@ -362,7 +372,7 @@ function createBdosDirectRunner(
     for (; steps < 100_000 && !runtime.isHalted(); steps += 1) {
       const pc = runtime.getPC();
       const stackPointer = runtime.captureCpuState().sp;
-      if (stackPointer >= BDOS_BASE && stackPointer < BIOS_BASE) {
+      if (stackPointer >= bdosBase && stackPointer < BIOS_BASE) {
         minimumResidentStackPointer = Math.min(
           minimumResidentStackPointer ?? stackPointer,
           stackPointer,
@@ -442,8 +452,9 @@ export function runBdosDirectCall(
 export function runBdosDirectCallSequence(
   bdos: Uint8Array,
   fixture: BdosDirectCallSequenceFixture,
+  profileId = DEFAULT_PROFILE,
 ): BdosDirectCallSequenceResult {
-  const run = createBdosDirectRunner(bdos, fixture.biosDisk);
+  const run = createBdosDirectRunner(bdos, fixture.biosDisk, profileId);
   return {
     id: fixture.id,
     steps: fixture.steps.map((step) => ({
@@ -457,12 +468,14 @@ export function unexpectedDirectCallWrites(
   result: BdosDirectCallResult,
   stackPointer: number,
   allowedAddresses: ReadonlySet<number> = new Set(),
+  profileId = DEFAULT_PROFILE,
 ): number[] {
+  const profile = targetProfile(profileId);
   const callStackFirst = (stackPointer - 2) & 0xffff;
   const callStackLast = (stackPointer - 1) & 0xffff;
   return result.changedAddresses.filter(
     (address) =>
-      !(address >= BDOS_BASE && address < BDOS_LIMIT) &&
+      !(address >= profile.bdos && address < profile.bios) &&
       !(address >= callStackFirst && address <= callStackLast) &&
       !result.biosOwnedWritableAddresses.includes(address) &&
       !result.biosMemoryWrittenAddresses.includes(address) &&

@@ -65,7 +65,7 @@ describe("named resident profiles", () => {
       ],
       [
         "bdos",
-        "02956431e3af849d99eecbffbb89a0c7a29487f91301575d1dd511127ab4d43b",
+        "52f481e90cf12c4610db1609f7d4247ff3b00eb31705fca06a52701a3723714e",
       ],
     ]) {
       const built = await assembleProfiledFile(

@@ -24,6 +24,14 @@ binary relocation would need instruction-aware fixups and could miss address
 constants; ad hoc text replacement of numeric literals would hide the contract.
 Named constants make every placement dependency visible in assembly source.
 
+`test-multi-drive-workspace-v1` is an unpublished diagnostic profile: CCP at
+`$E300`, BDOS at `$EB00` with 3,840 bytes, and the test BIOS boundary still at
+`$FA00`. It exists to execute the complete multi-drive candidate while its
+production resident-size decision is open. It is not the default profile,
+a qualified machine layout, or a format for rewriting existing system tracks.
+The direct-call harness accepts it only when explicitly selected; frozen
+oracle fixtures retain their original `$EC00` placement.
+
 Verification requires default-profile byte identity, profile validation,
 alternate-profile boot and command/file operations, warm-boot recovery, and
 loader/SAVE bounds at the alternate resident boundary. This is not a claim of

@@ -7,17 +7,21 @@ export const DEFAULT_PROFILE = "triptych-cpu-v0.1";
 const ORIGINS = Object.freeze({
   "triptych-cpu-v0.1": 0xe400,
   "test-low-memory-v1": 0xc400,
+  "test-multi-drive-workspace-v1": 0xe300,
 });
 
 export function targetProfile(id = DEFAULT_PROFILE) {
   if (!Object.hasOwn(ORIGINS, id))
     throw new Error(`unknown target profile ${id}`);
   const ccp = ORIGINS[id];
+  // Diagnostic room for the complete multi-drive implementation. This is not
+  // a production machine layout or permission to adapt an existing disk.
+  const bdosBytes = id === "test-multi-drive-workspace-v1" ? 0xf00 : 0xe00;
   if (
     !Number.isInteger(ccp) ||
     ccp < 0x200 ||
     ccp % 256 !== 0 ||
-    ccp + 0x1a00 > 0x10000
+    ccp + 0xc00 + bdosBytes > 0x10000
   ) {
     throw new Error(`invalid resident layout for ${id}`);
   }
@@ -25,8 +29,8 @@ export function targetProfile(id = DEFAULT_PROFILE) {
     id,
     ccp,
     bdos: ccp + 0x800,
-    bios: ccp + 0x1600,
-    end: ccp + 0x1a00,
+    bios: ccp + 0x800 + bdosBytes,
+    end: ccp + 0xc00 + bdosBytes,
   });
 }
 
