@@ -1,6 +1,7 @@
 # Multi-drive BDOS qualification
 
-Date: 2026-09-06. Status: release candidate 0.1.3; not yet published.
+Date: 2026-09-06. Status: 0.1.3 published; supplemental full-volume proof reviewed
+and included in the passing 362-test local regression gate.
 The explicit-FCB-drive regression is fixed. The portable interface tests cover
 two full-size drives; machine integration remains a separate gate.
 
@@ -124,9 +125,36 @@ reload through the independent test BIOS. The resulting complete gate passes
 361 tests. This profile retains the original component capacities; it is
 distinct from the larger diagnostic workspace used earlier.
 
-## Remaining integration
+## Complete-volume allocation
 
-The machine memory profile, dual-drive BIOS, A/B browser
-selection, persistence/recovery and exact ATOM/NUC/Edit workflows still require
-end-to-end tests. No new Portable CP/M release or Triptych deployment has been
-published from this work.
+The supplemental `eight-mib-full-volume.test.ts` begins with two empty 8 MiB
+filesystems and allocates all 65,280 data records on each through sequential
+BDOS writes. It checks each physical coordinate and complete unique payload,
+including the last block and record. Two files occupy 510 populated extents and
+two following empty extents; the next write therefore reaches disk-full rather
+than failing while allocating another directory entry.
+
+Both full-volume failures return 2 and preserve whole-image hashes, copied FCBs
+and allocation vectors, and the write count. Reopening checks allocation,
+extent and S2 boundaries. The final reset test clears the cached vectors after
+the completed fill, so reconstruction must come from the saved directory.
+This diagnostic change occurs only after actual allocation, not as a shortcut
+to a near-full state. Independent review found no blocking issue. The measured
+fill used 130,624 BDOS calls, 130,560 data writes and at most 16 of 64 stack
+bytes. This is a public-BIOS-double execution proof, not a machine BIOS or
+browser-storage proof.
+
+## Publication and remaining integration
+
+Version 0.1.3 was published from commit
+`c2b64f013f0a96d015f7aaa7a2c35183579a9559` after
+[main CI 34036247020](https://github.com/jhlagado/portable-cpm/actions/runs/34036247020)
+and independent source, profile and artifact review. Both artifact tuples were
+compared byte for byte with fresh local ATOM builds and downloaded again from
+the release. The default profile has plain binary/manifest assets; the A/B
+profile is in a separately named ZIP with its own manifest.
+
+The consuming machine's BIOS, application lifetimes, A/B browser selection and
+persistence/recovery require independent end-to-end tests. Publication of the
+portable OS does not establish those machine-level results or a Triptych
+deployment.
