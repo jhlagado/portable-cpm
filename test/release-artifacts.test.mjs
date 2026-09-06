@@ -5,7 +5,10 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { buildPortableCpmArtifacts } from "../tools/build-release.mjs";
-import { targetProfile } from "../tools/lib/target-profiles.mjs";
+import {
+  targetProfile,
+  TWO_MIB_PROFILE_IDS,
+} from "../tools/lib/target-profiles.mjs";
 
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
@@ -36,6 +39,7 @@ describe("portable CP/M release artifacts", () => {
     "triptych-cpu-v0.1",
     "test-low-memory-v1",
     "triptych-cpu-v0.1-8m-ab",
+    ...TWO_MIB_PROFILE_IDS,
   ]) {
     it(`builds deterministic CCP and BDOS binaries for ${profileId}`, async () => {
       const profile = targetProfile(profileId);

@@ -28,6 +28,20 @@ jobs:
         run: npm run check
       - name: Build qualified A/B resident profile
         run: npm run build -- dist-ab triptych-cpu-v0.1-8m-ab
+      - name: Build two-MiB resident profile family
+        run: |
+          node --input-type=module <<'JS'
+          import { resolve } from "node:path";
+          import { buildPortableCpmArtifacts } from "./tools/build-release.mjs";
+          import { TWO_MIB_PROFILE_IDS } from "./tools/lib/target-profiles.mjs";
+          for (const profileId of TWO_MIB_PROFILE_IDS) {
+            await buildPortableCpmArtifacts({
+              repositoryRoot: process.cwd(),
+              outputDirectory: resolve("dist-two-mib", profileId),
+              profileId,
+            });
+          }
+          JS
       - name: Retain qualified default-profile artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -45,4 +59,10 @@ jobs:
             dist-ab/ccp.bin
             dist-ab/bdos.bin
             dist-ab/manifest.json
+          if-no-files-found: error
+      - name: Retain two-MiB resident profile artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: portable-cpm-triptych-2m
+          path: dist-two-mib/
           if-no-files-found: error
