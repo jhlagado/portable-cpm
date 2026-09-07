@@ -193,10 +193,150 @@ describe("two MiB / two KiB / 1024-entry portable sixteen-drive boundary", () =>
         maxInstructions,
         writes,
         dataReads,
+        peakStackBytes: built.labels.STKTOP! - minSp,
       }),
       console: () => Buffer.from(consoleBytes).toString("ascii"),
     };
   }
+
+  it("writes P's complete data volume through BDOS, reconstructs it on reopen and safely reuses deleted blocks", () => {
+    const started = performance.now();
+    const m = machine();
+    const address = first(15);
+    const records = 16_000;
+    const payload = (record: number) => {
+      const bytes = Uint8Array.from(
+        { length: 128 },
+        (_, offset) => (record * 13 + (record >>> 8) * 7 + offset * 19) & 255,
+      );
+      bytes.set([15, record & 255, record >>> 8]);
+      return bytes;
+    };
+    const expected = new Uint8Array(records * 128);
+    const untouched = m.images.slice(0, 15).map(sha);
+    const reserved = sha(m.images[15]!.subarray(0, DIRECTORY));
+    const fullVector = new Uint8Array(127).fill(255);
+    assert.equal(m.call(13, 0).a, 0);
+    assert.equal(m.call(26, DMA).a, 0);
+    m.memory.set(fcb(15, "FULL"), address);
+    assert(m.call(22, address).a < 4);
+    for (let record = 0; record < records; record++) {
+      const bytes = payload(record);
+      expected.set(bytes, record * 128);
+      m.memory.set(bytes, DMA);
+      assert.equal(m.call(21, address).a, 0, `write record ${record}`);
+      assert.deepEqual(
+        m.images[15]!.subarray(DATA + record * 128, DATA + (record + 1) * 128),
+        bytes,
+        `physical record ${DATA / 128 + record}`,
+      );
+      if ((record & 15) === 0) {
+        const cell = ((record & 127) >>> 4) * 2;
+        assert.equal(word(m.memory, address + 16 + cell), 16 + record / 16);
+      }
+    }
+    assert(m.call(16, address).a < 4);
+    assert.deepEqual(m.images[15]!.subarray(DATA), expected);
+    assert.equal(DATA / 128 + records - 1, 16_383);
+    assert.deepEqual(m.vector(15), fullVector);
+    assert.deepEqual(m.images.slice(0, 15).map(sha), untouched);
+    assert.equal(sha(m.images[15]!.subarray(0, DIRECTORY)), reserved);
+
+    // Directory capacity is independent of data capacity: MAKE and CLOSE of
+    // another empty file succeed after every data block was genuinely written.
+    const extra = second(15);
+    m.memory.set(fcb(15, "EMPTY"), extra);
+    assert(m.call(22, extra).a < 4);
+    assert(m.call(16, extra).a < 4);
+    const freeEntries = Array.from({ length: 1024 }, (_, index) =>
+      m.images[15]![DIRECTORY + index * 32] === 0xe5 ? 1 : 0,
+    ).reduce<number>((sum, free) => sum + free, 0);
+    assert(freeEntries > 0, "disk-full is not directory-full");
+
+    function rejectAllocation(
+      target: ReturnType<typeof machine>,
+      fcbAddress: number,
+    ) {
+      const before = {
+        images: target.images.map(sha),
+        vectors: ALVS.map((_, drive) => target.vector(drive)),
+        fcb: target.memory.slice(fcbAddress, fcbAddress + 36),
+        writes: target.stats().writes,
+      };
+      target.memory.set(payload(records), DMA);
+      assert.equal(target.call(21, fcbAddress).a, 2);
+      assert.deepEqual(target.images.map(sha), before.images);
+      assert.deepEqual(
+        ALVS.map((_, drive) => target.vector(drive)),
+        before.vectors,
+      );
+      assert.deepEqual(
+        target.memory.slice(fcbAddress, fcbAddress + 36),
+        before.fcb,
+      );
+      assert.equal(target.stats().writes, before.writes);
+    }
+    rejectAllocation(m, address);
+    rejectAllocation(m, extra);
+
+    // Only persisted bytes cross this boundary. Fresh CPU/table/vector memory
+    // prevents a cached full ALV from concealing failed login reconstruction.
+    const reopened = machine();
+    reopened.images[15]!.set(m.images[15]!);
+    assert.equal(reopened.call(13, 0).a, 0);
+    assert.equal(reopened.call(26, DMA).a, 0);
+    reopened.memory.set(fcb(15, "FULL"), address);
+    assert(reopened.call(15, address).a < 4);
+    assert.deepEqual(reopened.vector(15), fullVector);
+    const saved = reopened.images.map(sha);
+    for (let record = 0; record < records; record++) {
+      reopened.memory.fill(0, DMA, DMA + 128);
+      assert.equal(reopened.call(20, address).a, 0, `read record ${record}`);
+      assert.deepEqual(reopened.memory.slice(DMA, DMA + 128), payload(record));
+    }
+    assert.equal(reopened.call(20, address).a, 1, "EOF after final record");
+    assert.equal(reopened.stats().dataReads, records);
+    assert.deepEqual(reopened.images.map(sha), saved);
+    reopened.memory.set(fcb(15, "EMPTY"), extra);
+    assert(reopened.call(15, extra).a < 4);
+    rejectAllocation(reopened, extra);
+
+    reopened.memory.set(fcb(15, "FULL"), address);
+    assert(reopened.call(19, address).a < 4);
+    assert.deepEqual(reopened.vector(15), emptyVector());
+    reopened.memory.set(fcb(15, "REUSE"), address);
+    assert(reopened.call(22, address).a < 4);
+    for (let record = 0; record < 17; record++) {
+      reopened.memory.set(payload(records + record), DMA);
+      assert.equal(reopened.call(21, address).a, 0);
+    }
+    assert(reopened.call(16, address).a < 4);
+    assert.equal(word(reopened.memory, address + 16), 16);
+    assert.equal(word(reopened.memory, address + 18), 17);
+    for (let record = 0; record < 17; record++)
+      assert.deepEqual(
+        reopened.images[15]!.subarray(
+          DATA + record * 128,
+          DATA + (record + 1) * 128,
+        ),
+        payload(records + record),
+      );
+    assert.deepEqual(reopened.images.slice(0, 15).map(sha), untouched);
+    assert.equal(sha(reopened.images[15]!.subarray(0, DIRECTORY)), reserved);
+    console.log(
+      JSON.stringify({
+        boundary: "portable-bdos-two-mib-full-volume-double",
+        records,
+        dataBlocks: 1000,
+        finalPhysicalRecord: 16_383,
+        freeDirectoryEntriesAfterFill: freeEntries,
+        bdosSha256: sha(built.bytes),
+        fill: m.stats(),
+        reopen: reopened.stats(),
+        elapsedMs: Math.round(performance.now() - started),
+      }),
+    );
+  }, 180_000);
 
   it("keeps unclosed allocations distinct on all sixteen drives and handles mask bits 7, 8 and 15 with default P", () => {
     const m = machine();
