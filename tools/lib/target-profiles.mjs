@@ -4,6 +4,13 @@ import { join } from "node:path";
 import { assembleAtomFile } from "./assemble-atom.mjs";
 
 export const DEFAULT_PROFILE = "triptych-cpu-v0.1";
+const TWO_MIB_PREFIX = "triptych-cpu-v0.1-2m-n";
+export const TWO_MIB_PROFILE_IDS = Object.freeze(
+  Array.from(
+    { length: 16 },
+    (_, index) => `${TWO_MIB_PREFIX}${String(index + 1).padStart(2, "0")}`,
+  ),
+);
 const ORIGINS = Object.freeze({
   "triptych-cpu-v0.1": 0xe400,
   "test-low-memory-v1": 0xc400,
@@ -12,9 +19,17 @@ const ORIGINS = Object.freeze({
 });
 
 export function targetProfile(id = DEFAULT_PROFILE) {
-  if (!Object.hasOwn(ORIGINS, id))
+  const twoMibIndex = TWO_MIB_PROFILE_IDS.indexOf(id);
+  if (!Object.hasOwn(ORIGINS, id) && twoMibIndex === -1)
     throw new Error(`unknown target profile ${id}`);
-  const ccp = ORIGINS[id];
+  // Machine contract: one 127-byte ALV plus one guard per configured slot,
+  // rounded to a full page. Odd/even pairs have equal origins, not equal
+  // machine configuration identities. This helper owns OS placement only.
+  const allocationBytes = 256 * Math.ceil((twoMibIndex + 1) / 2);
+  const ccp =
+    twoMibIndex === -1
+      ? ORIGINS[id]
+      : 0x10000 - allocationBytes - 0x400 - 0xe00 - 0x800;
   // Diagnostic room for the complete multi-drive implementation. This is not
   // a production machine layout or permission to adapt an existing disk.
   const bdosBytes = id === "test-multi-drive-workspace-v1" ? 0xf00 : 0xe00;

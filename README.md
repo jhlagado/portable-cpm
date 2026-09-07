@@ -30,6 +30,14 @@ provides separately identified OS artifacts for Triptych's A/B integration.
 The machine BIOS and application-stack lifetime qualification belong to
 Triptych; selecting this profile alone does not establish those results.
 
+The `triptych-cpu-v0.1-2m-n01` through `triptych-cpu-v0.1-2m-n16` family
+supplies resident placements for Triptych's configurable two-MiB machine.
+The suffix identifies one through sixteen configured drive slots. Odd/even
+pairs share OS origins and binary bytes; their manifests retain distinct
+profile identities for the corresponding machine BIOS and bootstrap. The
+[target-profile contract](docs/specifications/target-profiles.md#two-mib-configured-drive-family)
+lists the addresses and qualification boundaries.
+
 ## Development
 
 Requires Node.js 20 or newer.
@@ -51,6 +59,11 @@ published here. Sources require the profile's EQU preamble; do not assemble
 `src/ccp.asm` or `src/bdos.asm` without it. The build tool and guest self-assembly
 test use the same prepared flat source. See
 [target profiles](docs/specifications/target-profiles.md).
+
+CI builds all sixteen two-MiB placements and retains their separate directories
+in the `portable-cpm-triptych-2m` artifact. Each directory contains its own
+`ccp.bin`, `bdos.bin` and `manifest.json`. This is ordinary CI retention;
+permanent release assets and consumer pins require separate publication.
 
 `npm run check` assembles the replacement BDOS with the pinned ATOM revision,
 runs the direct-call, randomized filesystem and CCP scenario contracts through
