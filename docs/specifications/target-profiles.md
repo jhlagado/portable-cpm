@@ -99,9 +99,10 @@ Qualification has two separate boundaries:
 - `test/bdos/two-mib-sixteen-drive.test.ts` runs the existing BDOS at EC00
   through sixteen distinct DPHs/127-byte ALVs supplied by a BIOS double. It
   covers unclosed allocations across all drives, high mask bits, default P,
-  allocation/address boundaries and a full 1,024-entry directory on P. It does
-  not substitute for executing Triptych's new BIOS or for native/WASM storage
-  qualification.
+  allocation/address boundaries, a full 1,024-entry directory on P and
+  [guest full-volume allocation/readback](../reports/two-mib-full-volume.md)
+  through all 1,000 data blocks. It does not substitute for executing Triptych's
+  new BIOS or for native/WASM storage qualification.
 
 Release-artifact tests independently rebuild every named profile twice and
 compare the emitted files and manifests. Triptych owns the full disk geometry,
