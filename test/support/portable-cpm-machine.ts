@@ -1,4 +1,4 @@
-import type { CpuStateSnapshot } from "@jhlagado/debug80-runtime/z80/runtime";
+import type { CpuStateSnapshot } from "@jhlagado/z80-runtime/z80/runtime";
 
 import { createDebug80TestHarness } from "./debug80-runtime.js";
 import {

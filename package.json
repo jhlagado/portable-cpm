@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@jhlagado/debug80-runtime": "^0.2.0",
+    "@jhlagado/z80-runtime": "git+https://github.com/jhlagado/z80-runtime.git#e4ee190",
     "@types/node": "^24.13.3",
     "atom-z80": "git+https://github.com/jhlagado/atom.git#802b5c2d320bec777f427755ff2d7338e3b80a05",
     "prettier": "^3.6.2",
