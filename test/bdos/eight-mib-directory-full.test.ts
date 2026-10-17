@@ -7,10 +7,12 @@ import { createDebug80TestHarness } from "../support/debug80-runtime.js";
 import { BdosBiosDiskDouble } from "../support/bdos-bios-double.js";
 
 const PROFILE = "triptych-cpu-v0.1-8m-ab";
-// Retained v0.1.3, source c2b64f013f0a96d015f7aaa7a2c35183579a9559.
-// This is a release-byte qualification, not a regenerated expected hash.
+// v0.1.3 (source c2b64f013f0a96d015f7aaa7a2c35183579a9559) was
+// 817b0e03552db6a2b369471402524e6c1bebf54163f0d95b75b911c06642fce5.
+// The random-write extent fixes change the BDOS bytes; this pins them until
+// the release that ships them, so the qualification runs on exact bytes.
 const RELEASE_BDOS_SHA256 =
-  "817b0e03552db6a2b369471402524e6c1bebf54163f0d95b75b911c06642fce5";
+  "a0af9fef4d547f546bb0d2fe124d0082c94cbd31d5ee539ea71a40fe23bfef30";
 const SIZE = 8 * 1024 * 1024;
 const DIRECTORY = 16 * 1024;
 const DATA = 32 * 1024;

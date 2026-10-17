@@ -423,9 +423,8 @@ FNCLSE:
         JP      RETA
 
 CLOSEFCB:
-        LD      HL,(PARAM)
         LD      DE,14
-        ADD     HL,DE
+        CALL    FCBOFF
         BIT     7,(HL)
         JR      Z,CLOSEDIR
         XOR     A
@@ -531,9 +530,7 @@ FNMAKE:
         JP      RETA
 
 MAKEFCB:
-        LD      HL,(PARAM)
-        LD      DE,12
-        ADD     HL,DE
+        CALL    FCBEX
         LD      A,(WRTYPE)
         OR      A
         JR      Z,MAKESRCH
@@ -555,10 +552,9 @@ MAKESRCH:
         CP      $FF
         RET     Z
 
-        LD      HL,(PARAM)
-        LD      DE,12
-        ADD     HL,DE
-        LD      B,24
+        ; Clear EX through the allocation map; CR and r0-r2 are left alone.
+        CALL    FCBEX
+        LD      B,20
         XOR     A
 
 MAKEZERO:
@@ -569,9 +565,7 @@ MAKEZERO:
         LD      A,(WRTYPE)
         OR      A
         JR      Z,MAKECOPY
-        LD      HL,(PARAM)
-        LD      DE,12
-        ADD     HL,DE
+        CALL    FCBEX
         LD      A,(TARGEX)
         LD      (HL),A
         INC     HL
@@ -590,9 +584,8 @@ MAKECOPY:
         LD      BC,31
         LDIR
 
-        LD      HL,(PARAM)
         LD      DE,14
-        ADD     HL,DE
+        CALL    FCBOFF
         LD      A,(HL)
         OR      $80
         LD      (HL),A
@@ -624,9 +617,8 @@ FNATTR:
 
 FNRENAME:
         CALL    CHKRO
-        LD      HL,(PARAM)
         LD      DE,17
-        ADD     HL,DE
+        CALL    FCBOFF
 
 ; Rename and set-attributes apply to every extent belonging to the file. Keep
 ; the replacement field outside the directory buffer because FINDENT replaces
@@ -680,8 +672,8 @@ WRITEPOS:
         LD      A,2
         LD      (WRTYPE),A
         LD      A,(ZEROFIL)
-        OR      A
-        CALL    NZ,ZEROBLK
+        RRA
+        CALL    C,ZEROBLK
 
 WRITEBLK:
         CALL    POSREC
@@ -691,8 +683,11 @@ WRITEBLK:
         CALL    BIOWRS
         OR      A
         JR      NZ,WRITEBAD
+        ; Only a sequential write moves to the next extent after record 127.
+        ; ZEROFIL's bit 7 keeps a random write's sum away from 128.
         CALL    FCBCR
-        LD      A,(HL)
+        LD      A,(ZEROFIL)
+        ADD     A,(HL)
         CP      128
         CALL    Z,ADVEXT
         XOR     A
@@ -727,9 +722,8 @@ ADVWRITE:
         INC     (HL)
         LD      A,(HL)
         LD      B,A
-        LD      HL,(PARAM)
         LD      DE,15
-        ADD     HL,DE
+        CALL    FCBOFF
         CP      (HL)
         JR      C,WRITERC
         LD      (HL),B
@@ -762,9 +756,8 @@ READCHK:
         LD      A,(HL)
         LD      (SEQREC),A
         LD      B,A
-        LD      HL,(PARAM)
         LD      DE,15
-        ADD     HL,DE
+        CALL    FCBOFF
         LD      A,(HL)
         CP      B
         JP      Z,READ_EOF
@@ -786,17 +779,21 @@ READ_EOF:
         RET
 
 FNRREAD:
+        XOR     A
+        LD      (ZEROFIL),A
         CALL    RANDPREP
         JR      C,RANDRET
         CALL    READSEQ
         JR      RANDDONE
 
+; ZEROFIL is zero for reads and sequential writes. Random writes set bit 7,
+; and function 40 also sets bit 0 to zero-fill each newly allocated block.
 FNRWRITE:
-        XOR     A
+        LD      A,$80
         JR      RANDWRT
 
 FNWRZERO:
-        LD      A,1
+        LD      A,$81
 
 RANDWRT:
         LD      (ZEROFIL),A
@@ -817,7 +814,6 @@ RANDRET:
 
 RANDPREP:
         CALL    FCBCR
-        LD      A,(HL)
         INC     HL
         LD      C,(HL)
         INC     HL
@@ -853,9 +849,7 @@ RANDPREP:
         AND     $3F
         LD      (TARGS2),A
 
-        LD      HL,(PARAM)
-        LD      DE,12
-        ADD     HL,DE
+        CALL    FCBEX
         LD      A,(HL)
         AND     $1F
         LD      B,A
@@ -871,10 +865,14 @@ RANDPREP:
         CP      B
         JR      Z,RANDPOS
 
+; Leaving an extent closes it first, so its directory entry keeps the record
+; count and blocks written through this FCB.
 RANDOPEN:
-        LD      HL,(PARAM)
-        LD      DE,12
-        ADD     HL,DE
+        CALL    CLOSEFCB
+        INC     A
+        LD      A,3
+        JR      Z,RANDFAIL
+        CALL    FCBEX
         LD      A,(TARGEX)
         LD      (HL),A
         INC     HL
@@ -885,14 +883,9 @@ RANDOPEN:
         LD      A,(TARGS2)
         OR      B
         LD      (HL),A
-        LD      HL,(PARAM)
-        LD      (SRCHFCB),HL
-        LD      A,1
-        LD      (OPENMOD),A
-        CALL    NEWSRCH
-        CALL    FINDENT
-        CP      $FF
-        JR      Z,RANDMISS
+        CALL    NEXTFIND
+        OR      A
+        JR      NZ,RANDMISS
 
 RANDPOS:
         CALL    FCBCR
@@ -901,8 +894,20 @@ RANDPOS:
         XOR     A
         RET
 
+; A read of an extent that was never made returns 4. A write makes the
+; extent, as CP/M does, and returns 5 when the directory is full.
 RANDMISS:
-        LD      A,1
+        LD      A,(ZEROFIL)
+        OR      A
+        LD      A,4
+        JR      Z,RANDFAIL
+        LD      (WRTYPE),A
+        CALL    MAKEFCB
+        INC     A
+        JR      NZ,RANDPOS
+        LD      A,5
+
+RANDFAIL:
         SCF
         RET
 
@@ -922,8 +927,16 @@ FCBLOCK:
 
 ; Return the FCB sequential-record field in HL.
 FCBCR:
-        LD      HL,(PARAM)
         LD      DE,32
+        JR      FCBOFF
+
+; Return the FCB extent field in HL.
+FCBEX:
+        LD      DE,12
+
+; Return the FCB byte at offset DE in HL.
+FCBOFF:
+        LD      HL,(PARAM)
         ADD     HL,DE
         RET
 
@@ -1128,9 +1141,7 @@ DIVDONE:
         JP      BIOSEC
 
 NEXTEXT:
-        LD      HL,(PARAM)
-        LD      DE,12
-        ADD     HL,DE
+        CALL    FCBEX
         LD      A,(HL)
         INC     A
         AND     $1F
@@ -1275,9 +1286,8 @@ SIZEKEEP:
         JR      SIZELOOP
 
 SIZEDONE:
-        LD      HL,(PARAM)
         LD      DE,33
-        ADD     HL,DE
+        CALL    FCBOFF
         LD      A,(FSIZE0)
         LD      (HL),A
         INC     HL
@@ -1302,9 +1312,8 @@ FNSETRR:
         LD      A,(CAND2)
         ADC     A,0
         LD      (CAND2),A
-        LD      HL,(PARAM)
         LD      DE,33
-        ADD     HL,DE
+        CALL    FCBOFF
         LD      A,(CAND0)
         LD      (HL),A
         INC     HL

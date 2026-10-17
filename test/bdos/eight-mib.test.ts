@@ -298,11 +298,15 @@ describe("8 MiB EXM=0 BDOS geometry", () => {
     high[31] = 4087 >>> 8;
     const media = disk([high]);
     media.drives[0]!.records!.push({ record: 65535, fill: 0x79 });
+    // S2 bit 7 marks the FCB unmodified, as open leaves it, so leaving its
+    // extent needs no close; CP/M returns 3 when a modified one can't close.
+    const opened = entry(0, 0, 0);
+    opened[14] = 0x80;
     const results = run(media, [
       reset(),
       step("dma", 26, DMA),
       step("random-high", 33, FCB, [
-        { address: FCB, bytes: entry(0, 0, 0) },
+        { address: FCB, bytes: opened },
         { address: FCB + 33, bytes: [255, 255, 0] },
       ]),
     ]);

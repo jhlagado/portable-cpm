@@ -13,6 +13,7 @@ export default defineConfig({
       "test/bdos/two-mib-sixteen-drive.test.ts",
       "test/bdos/multiple-drive.test.ts",
       "test/bdos/randomized-filesystem.test.ts",
+      "test/bdos/random-write-extents.test.ts",
       "test/ccp/portable-machine.test.ts",
       "test/ccp/feature-matrix.test.ts",
       "test/ccp/scenario-matrix.test.ts",
